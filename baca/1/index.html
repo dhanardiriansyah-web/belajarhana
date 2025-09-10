@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permainan Belajar Membaca</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            touch-action: manipulation; /* Mencegah zoom saat double tap di mobile */
+            background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+        }
+        .card-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .card-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .mode-button.active {
+            background-color: #818cf8; /* indigo-400 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-2xl bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-6 md:p-8 text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Ayo Belajar Membaca!</h1>
+        <p class="text-gray-600 mt-2 mb-6">Tekan setiap kotak untuk mendengarkan bunyinya.</p>
+
+        <!-- Tombol Pindah Mode -->
+        <div class="flex justify-center space-x-4 mb-6">
+            <button id="mode-huruf-btn" class="mode-button active px-6 py-2 bg-white rounded-full shadow-md font-semibold text-gray-700 transition duration-300 hover:bg-gray-200">
+                Huruf Tunggal
+            </button>
+            <button id="mode-kata-btn" class="mode-button px-6 py-2 bg-white rounded-full shadow-md font-semibold text-gray-700 transition duration-300 hover:bg-gray-200">
+                Suku Kata
+            </button>
+        </div>
+
+        <!-- Kontainer untuk Huruf -->
+        <div id="huruf-container" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-3 md:gap-4">
+            <!-- Tombol huruf akan dibuat oleh JavaScript -->
+        </div>
+
+        <!-- Kontainer untuk Kata -->
+        <div id="kata-container" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+            <!-- Tombol kata akan dibuat oleh JavaScript -->
+        </div>
+
+        <!-- Pesan jika browser tidak mendukung -->
+        <div id="unsupported-message" class="hidden mt-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" role="alert">
+            <strong class="font-bold">Maaf!</strong>
+            <span class="block sm:inline">Browser Anda tidak mendukung fitur suara. Coba gunakan browser lain seperti Chrome atau Firefox.</span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cek dukungan SpeechSynthesis API
+            if (!('speechSynthesis' in window)) {
+                document.getElementById('unsupported-message').classList.remove('hidden');
+                return;
+            }
+
+            // --- DATA HURUF DAN KATA ---
+            const hurufBelajar = [
+                { huruf: 'a', bunyi: 'a' }, { huruf: 'b', bunyi: 'b' }, { huruf: 'c', bunyi: 'c' },
+                { huruf: 'd', bunyi: 'd' }, { huruf: 'e', bunyi: 'e' }, { huruf: 'f', bunyi: 'f' },
+                { huruf: 'g', bunyi: 'g' }, { huruf: 'h', bunyi: 'h' }, { huruf: 'i', bunyi: 'i' },
+                { huruf: 'j', bunyi: 'j' }, { huruf: 'k', bunyi: 'k' }, { huruf: 'l', bunyi: 'l' },
+                { huruf: 'm', bunyi: 'm' }, { huruf: 'n', bunyi: 'n' }, { huruf: 'o', bunyi: 'o' },
+                { huruf: 'p', bunyi: 'p' }, { huruf: 'q', bunyi: 'q' }, { huruf: 'r', bunyi: 'r' },
+                { huruf: 's', bunyi: 's' }, { huruf: 't', bunyi: 't' }, { huruf: 'u', bunyi: 'u' },
+                { huruf: 'v', bunyi: 'v' }, { huruf: 'w', bunyi: 'w' }, { huruf: 'x', bunyi: 'x' },
+                { huruf: 'y', bunyi: 'y' }, { huruf: 'z', bunyi: 'z' }
+            ];
+
+            const kataBelajar = [
+                { kata: 'ba', bunyi: 'ba' }, { kata: 'ca', bunyi: 'ca' }, { kata: 'da', bunyi: 'da' },
+                { kata: 'fa', bunyi: 'fa' }, { kata: 'ga', bunyi: 'ga' }, { kata: 'ha', bunyi: 'ha' },
+                { kata: 'ja', bunyi: 'ja' }, { kata: 'ka', bunyi: 'ka' }, { kata: 'la', bunyi: 'la' },
+                { kata: 'ma', bunyi: 'ma' }, { kata: 'na', bunyi: 'na' }, { kata: 'pa', bunyi: 'pa' },
+                { kata: 'ra', bunyi: 'ra' }, { kata: 'sa', bunyi: 'sa' }, { kata: 'ta', bunyi: 'ta' },
+                { kata: 'wa', bunyi: 'wa' }, { kata: 'ya', bunyi: 'ya' }, { kata: 'za', bunyi: 'za' }
+            ];
+
+            const hurufContainer = document.getElementById('huruf-container');
+            const kataContainer = document.getElementById('kata-container');
+            const modeHurufBtn = document.getElementById('mode-huruf-btn');
+            const modeKataBtn = document.getElementById('mode-kata-btn');
+
+            // --- FUNGSI UTAMA ---
+
+            // Fungsi untuk mengeluarkan suara
+            function speak(text) {
+                // Hentikan suara yang sedang berjalan
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID'; // Menggunakan suara Bahasa Indonesia
+                utterance.rate = 0.9; // Sedikit lebih lambat agar jelas
+                window.speechSynthesis.speak(utterance);
+            }
+
+            // Fungsi untuk membuat tombol kartu
+            function createButton(item, type) {
+                const button = document.createElement('button');
+                const text = type === 'huruf' ? item.huruf : item.kata;
+                const sound = type === 'huruf' ? item.bunyi : item.bunyi;
+
+                let fontSizeClass = 'text-5xl md:text-6xl'; // Ukuran font besar untuk huruf tunggal
+                if (type === 'kata') {
+                    fontSizeClass = 'text-4xl md:text-5xl'; // Ukuran font disesuaikan untuk suku kata
+                }
+                
+                // --- PERBAIKAN UI ---
+                // Menambahkan flexbox untuk centering dan aspect-square agar kotak konsisten
+                button.className = `card-button flex items-center justify-center aspect-square bg-white p-2 rounded-xl shadow-lg ${fontSizeClass} font-bold text-indigo-500 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 transform hover:scale-105`;
+                button.textContent = text;
+                button.addEventListener('click', () => speak(sound));
+                return button;
+            }
+
+            // Fungsi untuk menampilkan tombol-tombol ke layar
+            function renderButtons() {
+                // Kosongkan kontainer
+                hurufContainer.innerHTML = '';
+                kataContainer.innerHTML = '';
+
+                // Buat tombol huruf
+                hurufBelajar.forEach(item => {
+                    const button = createButton(item, 'huruf');
+                    hurufContainer.appendChild(button);
+                });
+
+                // Buat tombol kata
+                kataBelajar.forEach(item => {
+                    const button = createButton(item, 'kata');
+                    kataContainer.appendChild(button);
+                });
+            }
+
+            // Fungsi untuk berpindah mode
+            function switchMode(mode) {
+                if (mode === 'huruf') {
+                    hurufContainer.classList.remove('hidden');
+                    kataContainer.classList.add('hidden');
+                    modeHurufBtn.classList.add('active');
+                    modeKataBtn.classList.remove('active');
+                } else if (mode === 'kata') {
+                    hurufContainer.classList.add('hidden');
+                    kataContainer.classList.remove('hidden');
+                    modeHurufBtn.classList.remove('active');
+                    modeKataBtn.classList.add('active');
+                }
+            }
+
+            // --- INISIALISASI ---
+            
+            // Render semua tombol saat halaman dimuat
+            renderButtons();
+
+            // Tambahkan event listener untuk tombol mode
+            modeHurufBtn.addEventListener('click', () => switchMode('huruf'));
+            modeKataBtn.addEventListener('click', () => switchMode('kata'));
+        });
+    </script>
+</body>
+</html>
+
