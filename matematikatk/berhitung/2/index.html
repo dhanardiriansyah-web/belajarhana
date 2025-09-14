@@ -114,13 +114,13 @@
 
         <!-- Navigasi Game -->
         <nav class="flex justify-center space-x-2 md:space-x-4 mb-8">
-            <button id="nav-game1" class="nav-button nav-button-active text-sm md:text-base font-bold py-2 px-4 rounded-full bg-blue-500 text-white shadow-md transition-transform transform hover:scale-105" onclick="switchGame('game1')">ikatan bilangan</button>
+            <button id="nav-game1" class="nav-button nav-button-active text-sm md:text-base font-bold py-2 px-4 rounded-full bg-blue-500 text-white shadow-md transition-transform transform hover:scale-105" onclick="switchGame('game1')">Ikatan Nomor</button>
             <button id="nav-game2" class="nav-button text-sm md:text-base font-bold py-2 px-4 rounded-full bg-gray-200 text-gray-700 shadow-md transition-transform transform hover:scale-105" onclick="switchGame('game2')">Mengisi Ten Frame</button>
             <button id="nav-game3" class="nav-button text-sm md:text-base font-bold py-2 px-4 rounded-full bg-gray-200 text-gray-700 shadow-md transition-transform transform hover:scale-105" onclick="switchGame('game3')">Kurang-kurangan</button>
         </nav>
 
         <main>
-            <!-- Game 1: ikatan bilangan (Number Bonds) -->
+            <!-- Game 1: Ikatan Nomor (Number Bonds) -->
             <div id="game1" class="game-container">
                 <div class="text-center mb-4">
                     <button onclick="speakInstruction(1)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center">
@@ -191,7 +191,7 @@
         }
 
         const instructions = {
-            1: "Lihat ikatan bilangannya. Seret gambar dari bawah untuk mengisi kotak yang kosong. Kalau sudah, tekan tombol periksa jawaban.",
+            1: "Lihat ikatan nomornya. Seret gambar dari bawah untuk mengisi kotak yang kosong. Kalau sudah, tekan tombol periksa jawaban.",
             2: "Lihat ten frame-nya. Berapa kotak lagi yang harus diisi agar menjadi sepuluh?",
             3: "Ada beberapa benda yang dicoret. Berapa benda yang tidak dicoret? Hitung sisanya.",
         };
@@ -263,14 +263,60 @@
             }
             return shuffleArray(Array.from(options));
         }
+        
+        // --- TOUCH DRAG & DROP HANDLERS ---
+        let touchClone = null;
+        
+        function touchMoveHandler(e) {
+            if (!touchClone) return;
+            touchClone.style.left = `${e.touches[0].pageX - 25}px`;
+            touchClone.style.top = `${e.touches[0].pageY - 25}px`;
 
-        // --- GAME 1: ikatan bilangan ---
+            const dropZone = document.getElementById('game1-drop-zone');
+            touchClone.style.display = 'none';
+            const elementUnder = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+            touchClone.style.display = '';
+
+            if (dropZone && (elementUnder === dropZone || dropZone.contains(elementUnder))) {
+                dropZone.classList.add('drag-over');
+            } else if (dropZone) {
+                dropZone.classList.remove('drag-over');
+            }
+        }
+
+        function touchEndHandler(e) {
+            if (touchClone) touchClone.remove();
+            touchClone = null;
+
+            const dropZone = document.getElementById('game1-drop-zone');
+            const elementUnder = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+
+            if (dropZone && (elementUnder === dropZone || dropZone.contains(elementUnder))) {
+                if (draggedItem) {
+                    const newItem = draggedItem.cloneNode(true);
+                    newItem.classList.remove('draggable');
+                    newItem.classList.add('w-8', 'h-8');
+                    newItem.onclick = () => newItem.remove();
+                    dropZone.appendChild(newItem);
+                }
+            }
+            if (dropZone) dropZone.classList.remove('drag-over');
+            
+            draggedItem = null;
+            document.removeEventListener('touchmove', touchMoveHandler);
+            document.removeEventListener('touchend', touchEndHandler);
+        }
+
+
+        // --- GAME 1: Ikatan Nomor ---
         function setupGame1() {
             const area = document.getElementById('game1-area');
             const palette = document.getElementById('game1-item-palette');
             const feedbackEl = document.getElementById('game1-feedback');
             const checkBtn = document.getElementById('game1-check-btn');
             area.innerHTML = ''; palette.innerHTML = ''; feedbackEl.textContent = '';
+            checkBtn.onclick = checkGame1;
+
 
             const whole = Math.floor(Math.random() * 7) + 4; // 4-10
             const part1 = Math.floor(Math.random() * (whole - 1)) + 1;
@@ -295,8 +341,29 @@
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'w-10 h-10 draggable';
                 itemDiv.innerHTML = assets[itemKey];
+                
+                // Desktop Drag Events
                 itemDiv.draggable = true;
-                itemDiv.addEventListener('dragstart', e => { draggedItem = itemDiv; });
+                itemDiv.addEventListener('dragstart', () => { draggedItem = itemDiv; });
+                
+                // Mobile Touch Events
+                itemDiv.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    draggedItem = itemDiv;
+
+                    touchClone = itemDiv.cloneNode(true);
+                    touchClone.style.position = 'absolute';
+                    touchClone.style.pointerEvents = 'none';
+                    touchClone.style.zIndex = '1000';
+                    touchClone.style.opacity = '0.7';
+                    touchClone.style.left = `${e.touches[0].pageX - 25}px`;
+                    touchClone.style.top = `${e.touches[0].pageY - 25}px`;
+                    document.body.appendChild(touchClone);
+
+                    document.addEventListener('touchmove', touchMoveHandler);
+                    document.addEventListener('touchend', touchEndHandler);
+                });
+
                 palette.appendChild(itemDiv);
             }
 
@@ -317,8 +384,6 @@
                     dropZone.appendChild(newItem);
                 }
             });
-            
-            checkBtn.onclick = checkGame1;
         }
 
         function checkGame1() {
