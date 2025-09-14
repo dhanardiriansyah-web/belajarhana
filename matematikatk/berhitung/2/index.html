@@ -105,7 +105,7 @@
         }
     </style>
 </head>
-<body class="bg-blue-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+<body class="bg-blue-50 text-gray-800 min-h-screen p-4">
     <div class="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6">
         <header class="text-center mb-6">
             <h1 class="text-3xl md:text-4xl font-bold text-blue-600">Petualangan Matematika Seru</h1>
@@ -259,7 +259,7 @@
             const options = new Set([correctAnswer]);
             while (options.size < 3) {
                 const wrongOpt = Math.floor(Math.random() * maxNum) + 1;
-                if (wrongOpt !== correctAnswer) options.add(wrongOpt);
+                if (wrongOpt !== correctAnswer && wrongOpt > 0) options.add(wrongOpt);
             }
             return shuffleArray(Array.from(options));
         }
@@ -269,6 +269,9 @@
         
         function touchMoveHandler(e) {
             if (!touchClone) return;
+            // Prevent scrolling while dragging
+            e.preventDefault();
+            
             touchClone.style.left = `${e.touches[0].pageX - 25}px`;
             touchClone.style.top = `${e.touches[0].pageY - 25}px`;
 
@@ -285,8 +288,10 @@
         }
 
         function touchEndHandler(e) {
-            if (touchClone) touchClone.remove();
-            touchClone = null;
+            if (touchClone) {
+                touchClone.remove();
+                touchClone = null;
+            }
 
             const dropZone = document.getElementById('game1-drop-zone');
             const elementUnder = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
@@ -344,25 +349,29 @@
                 
                 // Desktop Drag Events
                 itemDiv.draggable = true;
-                itemDiv.addEventListener('dragstart', () => { draggedItem = itemDiv; });
+                itemDiv.addEventListener('dragstart', (e) => { 
+                    draggedItem = e.target;
+                });
                 
                 // Mobile Touch Events
                 itemDiv.addEventListener('touchstart', e => {
                     e.preventDefault();
-                    draggedItem = itemDiv;
+                    draggedItem = e.target.closest('.draggable');
 
-                    touchClone = itemDiv.cloneNode(true);
+                    touchClone = draggedItem.cloneNode(true);
                     touchClone.style.position = 'absolute';
                     touchClone.style.pointerEvents = 'none';
                     touchClone.style.zIndex = '1000';
                     touchClone.style.opacity = '0.7';
+                    touchClone.style.width = '50px';
+                    touchClone.style.height = '50px';
                     touchClone.style.left = `${e.touches[0].pageX - 25}px`;
                     touchClone.style.top = `${e.touches[0].pageY - 25}px`;
                     document.body.appendChild(touchClone);
 
-                    document.addEventListener('touchmove', touchMoveHandler);
+                    document.addEventListener('touchmove', touchMoveHandler, { passive: false });
                     document.addEventListener('touchend', touchEndHandler);
-                });
+                }, { passive: false });
 
                 palette.appendChild(itemDiv);
             }
