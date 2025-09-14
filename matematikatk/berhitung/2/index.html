@@ -11,7 +11,7 @@
     <style>
         body {
             font-family: 'Nunito', sans-serif;
-            touch-action: none;
+            /* Menghapus touch-action: none; untuk mengaktifkan scrolling */
         }
         .game-card {
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -355,7 +355,7 @@
                 
                 // Mobile Touch Events
                 itemDiv.addEventListener('touchstart', e => {
-                    e.preventDefault();
+                    // e.preventDefault(); // Dihapus agar scrolling tetap bisa
                     draggedItem = e.target.closest('.draggable');
 
                     touchClone = draggedItem.cloneNode(true);
@@ -371,7 +371,7 @@
 
                     document.addEventListener('touchmove', touchMoveHandler, { passive: false });
                     document.addEventListener('touchend', touchEndHandler);
-                }, { passive: false });
+                }, { passive: true }); // Diubah ke true untuk memperbolehkan default behavior (scrolling)
 
                 palette.appendChild(itemDiv);
             }
