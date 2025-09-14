@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Matematika Seru</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            touch-action: none;
+        }
+        .game-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .correct {
+            border: 4px solid #4ade80 !important; /* green-400 */
+            animation: bounce 0.5s;
+        }
+        .incorrect {
+            border: 4px solid #f87171 !important; /* red-400 */
+            animation: shake 0.5s;
+        }
+        .number-button {
+            font-size: 2.5rem;
+            font-weight: 900;
+            width: 80px;
+            height: 80px;
+        }
+        .ten-frame {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            width: 300px;
+            padding: 8px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        .ten-frame-cell {
+            width: 100%;
+            padding-bottom: 100%; /* Aspect ratio 1:1 */
+            position: relative;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+        }
+        .ten-frame-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            background-color: #ef4444; /* red-500 */
+        }
+        .crossed-out {
+            position: relative;
+        }
+        .crossed-out::after {
+            content: '❌';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            opacity: 0.8;
+            color: #dc2626;
+        }
+        .draggable {
+            touch-action: none;
+            user-select: none;
+            cursor: grab;
+        }
+        .drop-zone {
+            min-height: 160px;
+            border-style: dashed;
+        }
+        .drop-zone.drag-over {
+            background-color: #fef9c3; /* yellow-100 */
+            border-color: #facc15; /* yellow-400 */
+        }
+
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .nav-button-active {
+            background-color: #3b82f6; /* blue-600 */
+            color: white;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-blue-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-600">Petualangan Matematika Seru</h1>
+            <p class="text-gray-500 mt-1">Pilih permainan di bawah ini!</p>
+        </header>
+
+        <!-- Navigasi Game -->
+        <nav class="flex justify-center space-x-2 md:space-x-4 mb-8">
+            <button id="nav-game1" class="nav-button nav-button-active text-sm md:text-base font-bold py-2 px-4 rounded-full bg-blue-500 text-white shadow-md transition-transform transform hover:scale-105" onclick="switchGame('game1')">ikatan bilangan</button>
+            <button id="nav-game2" class="nav-button text-sm md:text-base font-bold py-2 px-4 rounded-full bg-gray-200 text-gray-700 shadow-md transition-transform transform hover:scale-105" onclick="switchGame('game2')">Mengisi Ten Frame</button>
+            <button id="nav-game3" class="nav-button text-sm md:text-base font-bold py-2 px-4 rounded-full bg-gray-200 text-gray-700 shadow-md transition-transform transform hover:scale-105" onclick="switchGame('game3')">Kurang-kurangan</button>
+        </nav>
+
+        <main>
+            <!-- Game 1: ikatan bilangan (Number Bonds) -->
+            <div id="game1" class="game-container">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(1)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                        Dengarkan Instruksi
+                    </button>
+                </div>
+                <div id="game1-area" class="flex flex-col items-center justify-center gap-4 mb-6 min-h-[200px]"></div>
+                <div id="game1-item-palette" class="bg-gray-100 p-2 rounded-lg flex flex-wrap items-center justify-center gap-2 mb-4"></div>
+                <div class="text-center">
+                    <button id="game1-check-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-xl">Periksa Jawaban</button>
+                </div>
+                <div id="game1-feedback" class="text-center font-bold text-2xl mt-4 h-8"></div>
+            </div>
+
+            <!-- Game 2: Mengisi Ten Frame -->
+            <div id="game2" class="game-container hidden">
+                 <div class="text-center mb-4">
+                    <button onclick="speakInstruction(2)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                        Dengarkan Instruksi
+                    </button>
+                </div>
+                <div class="flex flex-col items-center gap-6">
+                    <div id="game2-ten-frame" class="ten-frame bg-blue-100"></div>
+                    <div id="game2-options" class="flex justify-center gap-4 md:gap-6"></div>
+                </div>
+                <div id="game2-feedback" class="text-center font-bold text-2xl mt-4 h-8"></div>
+            </div>
+
+            <!-- Game 3: Kurang-kurangan -->
+            <div id="game3" class="game-container hidden">
+                 <div class="text-center mb-4">
+                    <button onclick="speakInstruction(3)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                        Dengarkan Instruksi
+                    </button>
+                </div>
+                <div id="game3-items" class="bg-gray-100 min-h-[150px] p-4 rounded-lg flex flex-wrap items-center justify-center gap-4 mb-6"></div>
+                <div id="game3-options" class="flex justify-center gap-4 md:gap-6"></div>
+                <div id="game3-feedback" class="text-center font-bold text-2xl mt-4 h-8"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- DATA & STATE MANAGEMENT ---
+        const assets = {
+            apple: `<svg viewBox="0 0 200 200" class="w-full h-full"><g><path d="M148.5,108.8c0,32.7-26.5,59.2-59.2,59.2s-59.2-26.5-59.2-59.2c0-23,12-43.2,29.6-52.9c10.4-5.7,22.4-9,35.5-6.7 C110.1,28.8,126.9,15,126.9,15c15.1,17.4,11.4,41.3,11.4,41.3c8.3,6.3,10.2,20.2,10.2,20.2V108.8z" fill="#D0021B"/><path d="M115.5,49.2c-5.6-18.1-23-19.6-23-19.6s-5.3,15.6,2.5,25.3C102.8,64.6,115.5,49.2,115.5,49.2z" fill="#7ED321"/></g></svg>`,
+            car: `<svg viewBox="0 0 200 200" class="w-full h-full"><g><path d="M174.4,111.7c-3.2,10.1-26.4,13.2-26.4,13.2H50.8c0,0-15.1-4-19-15.3c-3.9-11.3,0-23.4,0-23.4l19-33.8h112.5 l18.2,34.8C181.5,87.2,177.6,101.5,174.4,111.7z" fill="#4A90E2"/><circle cx="65.5" cy="124.5" r="17.5" fill="#232323"/><circle cx="134.5" cy="124.5" r="17.5" fill="#232323"/><path d="M141.6,58.8L125,83.9H75L58.4,58.8H141.6z" fill="#A9D0F5"/></g></svg>`,
+            star: `<svg viewBox="0 0 200 200" class="w-full h-full"><path d="M100,10l25.8,52.3l57.7,8.4l-41.8,40.7l9.9,57.5L100,142.5l-51.6,26.9l9.9-57.5L16.5,70.7l57.7-8.4L100,10z" fill="#F8E71C" stroke="#F5A623" stroke-width="5" stroke-linejoin="round"/></svg>`,
+            sun: `<svg viewBox="0 0 200 200" class="w-full h-full"><g fill="#F8E71C"><circle cx="100" cy="100" r="45"/><path d="M100,30c-5.5,0-10-4.5-10-10V10c0-5.5,4.5-10,10-10s10,4.5,10,10v10C110,25.5,105.5,30,100,30z"/><path d="M100,190c-5.5,0-10-4.5-10-10v-10c0-5.5,4.5-10,10-10s10,4.5,10,10v10C110,185.5,105.5,190,100,190z"/><path d="M170,100c0,5.5,4.5,10,10,10h10c5.5,0,10-4.5,10-10s-4.5-10-10-10h-10C174.5,90,170,94.5,170,100z"/><path d="M10,100c0,5.5,4.5,10,10,10h10c5.5,0,10-4.5,10-10s-4.5-10-10-10H20C14.5,90,10,94.5,10,100z"/><path d="M156.1,58.1c-3.9,3.9-10.2,3.9-14.1,0l-7.1-7.1c-3.9-3.9-3.9-10.2,0-14.1s10.2-3.9,14.1,0l7.1,7.1 C160,47.9,160,54.2,156.1,58.1z"/><path d="M43.9,156.1c-3.9,3.9-10.2,3.9-14.1,0l-7.1-7.1c-3.9-3.9-3.9-10.2,0-14.1s10.2-3.9,14.1,0l7.1,7.1 C47.9,145.8,47.9,152.1,43.9,156.1z"/><path d="M156.1,141.9c3.9,3.9,3.9,10.2,0,14.1l-7.1,7.1c-3.9,3.9-10.2,3.9-14.1,0s-3.9-10.2,0-14.1l7.1-7.1 C145.8,138,152.1,138,156.1,141.9z"/><path d="M43.9,43.9c3.9,3.9,3.9,10.2,0,14.1l-7.1,7.1c-3.9,3.9-10.2,3.9-14.1,0s-3.9-10.2,0-14.1l7.1-7.1 C33.7,40,40,40,43.9,43.9z"/></g></svg>`,
+        };
+        const assetKeys = Object.keys(assets);
+        let activeGame = 'game1';
+        let currentAnswers = { game1: 0, game2: 0, game3: 0 };
+        let draggedItem = null;
+
+        // --- SPEECH SYNTHESIS ---
+        const synth = window.speechSynthesis;
+        function speak(text) {
+            if (synth.speaking) synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.pitch = 1.1;
+            utterance.rate = 0.9;
+            synth.speak(utterance);
+        }
+
+        const instructions = {
+            1: "Lihat ikatan bilangannya. Seret gambar dari bawah untuk mengisi kotak yang kosong. Kalau sudah, tekan tombol periksa jawaban.",
+            2: "Lihat ten frame-nya. Berapa kotak lagi yang harus diisi agar menjadi sepuluh?",
+            3: "Ada beberapa benda yang dicoret. Berapa benda yang tidak dicoret? Hitung sisanya.",
+        };
+        
+        function speakInstruction(gameId) {
+            speak(instructions[gameId]);
+        }
+
+        // --- GAME SWITCHING ---
+        function switchGame(gameId) {
+            activeGame = gameId;
+            document.querySelectorAll('.game-container').forEach(c => c.classList.add('hidden'));
+            document.getElementById(gameId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-button').forEach(b => {
+                b.classList.remove('nav-button-active', 'bg-blue-500', 'text-white');
+                b.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            
+            const activeButton = document.getElementById('nav-' + gameId);
+            activeButton.classList.add('nav-button-active', 'bg-blue-500', 'text-white');
+            activeButton.classList.remove('bg-gray-200', 'text-gray-700');
+            
+            if (gameId === 'game1') setupGame1();
+            if (gameId === 'game2') setupGame2();
+            if (gameId === 'game3') setupGame3();
+
+            setTimeout(() => speakInstruction(parseInt(gameId.replace('game', ''))), 100);
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function playFeedback(isCorrect, element) {
+            const correctFeedback = ['Hebat!', 'Pintar!', 'Benar sekali!'];
+            const incorrectFeedback = ['Coba lagi ya!', 'Ayo, sedikit lagi!', 'Belum tepat.'];
+            const feedbackText = isCorrect ? correctFeedback[Math.floor(Math.random() * correctFeedback.length)] : incorrectFeedback[Math.floor(Math.random() * incorrectFeedback.length)];
+            speak(feedbackText);
+            
+            const feedbackEl = document.getElementById(`${activeGame}-feedback`);
+            if (feedbackEl) {
+                feedbackEl.textContent = feedbackText;
+                feedbackEl.style.color = isCorrect ? '#4ade80' : '#f87171';
+            }
+            if (element) {
+                element.classList.add(isCorrect ? 'correct' : 'incorrect');
+            }
+        }
+
+        function createNumberButton(num, clickHandler) {
+            const button = document.createElement('button');
+            button.className = 'game-card number-button flex items-center justify-center rounded-full bg-white border-4 border-gray-200 text-blue-500';
+            button.textContent = num;
+            button.onclick = () => clickHandler(num, button);
+            return button;
+        }
+
+        function getOptions(correctAnswer, maxNum) {
+            const options = new Set([correctAnswer]);
+            while (options.size < 3) {
+                const wrongOpt = Math.floor(Math.random() * maxNum) + 1;
+                if (wrongOpt !== correctAnswer) options.add(wrongOpt);
+            }
+            return shuffleArray(Array.from(options));
+        }
+
+        // --- GAME 1: ikatan bilangan ---
+        function setupGame1() {
+            const area = document.getElementById('game1-area');
+            const palette = document.getElementById('game1-item-palette');
+            const feedbackEl = document.getElementById('game1-feedback');
+            const checkBtn = document.getElementById('game1-check-btn');
+            area.innerHTML = ''; palette.innerHTML = ''; feedbackEl.textContent = '';
+
+            const whole = Math.floor(Math.random() * 7) + 4; // 4-10
+            const part1 = Math.floor(Math.random() * (whole - 1)) + 1;
+            const part2 = whole - part1;
+            currentAnswers.game1 = part2;
+            const itemKey = assetKeys[Math.floor(Math.random() * assetKeys.length)];
+
+            area.innerHTML = `
+                <div class="flex items-center justify-center p-4 bg-green-200 rounded-full w-32 h-32 border-4 border-green-400">
+                    <div class="text-6xl font-black text-green-700">${whole}</div>
+                </div>
+                <div class="flex justify-center gap-12 w-full">
+                    <div class="flex flex-col items-center p-2 bg-blue-100 rounded-lg w-40 h-40 border-2 border-blue-300">
+                         <div class="flex flex-wrap gap-1 justify-center">${Array(part1).fill(`<div class="w-8 h-8">${assets[itemKey]}</div>`).join('')}</div>
+                    </div>
+                    <div id="game1-drop-zone" class="drop-zone flex flex-wrap items-start content-start gap-1 p-2 bg-yellow-100 rounded-lg w-40 h-40 border-2 border-yellow-400">
+                    </div>
+                </div>
+            `;
+            
+            for(let i=0; i < 10; i++) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'w-10 h-10 draggable';
+                itemDiv.innerHTML = assets[itemKey];
+                itemDiv.draggable = true;
+                itemDiv.addEventListener('dragstart', e => { draggedItem = itemDiv; });
+                palette.appendChild(itemDiv);
+            }
+
+            const dropZone = document.getElementById('game1-drop-zone');
+            dropZone.addEventListener('dragover', e => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                if(draggedItem) {
+                    const newItem = draggedItem.cloneNode(true);
+                    newItem.classList.remove('draggable');
+                    newItem.classList.add('w-8', 'h-8');
+                    newItem.onclick = () => newItem.remove(); // Click to remove
+                    dropZone.appendChild(newItem);
+                }
+            });
+            
+            checkBtn.onclick = checkGame1;
+        }
+
+        function checkGame1() {
+            const dropZone = document.getElementById('game1-drop-zone');
+            const count = dropZone.children.length;
+            const isCorrect = count === currentAnswers.game1;
+            
+            playFeedback(isCorrect, dropZone);
+            
+            if (isCorrect) {
+                document.getElementById('game1-check-btn').onclick = null;
+                setTimeout(setupGame1, 2000);
+            } else {
+                setTimeout(() => {
+                    dropZone.classList.remove('incorrect');
+                }, 2000);
+            }
+        }
+
+        // --- GAME 2: Mengisi Ten Frame ---
+        function setupGame2() {
+            const frame = document.getElementById('game2-ten-frame');
+            const optionsArea = document.getElementById('game2-options');
+            const feedbackEl = document.getElementById('game2-feedback');
+            frame.innerHTML = ''; optionsArea.innerHTML = ''; feedbackEl.textContent = '';
+            
+            const startNum = Math.floor(Math.random() * 5) + 5; // 5-9
+            const answer = 10 - startNum;
+            currentAnswers.game2 = answer;
+            
+            for(let i=0; i<10; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'ten-frame-cell';
+                if (i < startNum) {
+                    cell.innerHTML = '<div class="ten-frame-dot"></div>';
+                }
+                frame.appendChild(cell);
+            }
+
+            const shuffledOptions = getOptions(answer, 5);
+            shuffledOptions.forEach(opt => {
+                optionsArea.appendChild(createNumberButton(opt, checkGame2));
+            });
+        }
+        
+        function checkGame2(selectedNum, buttonElement) {
+            document.querySelectorAll('#game2-options button').forEach(b => b.onclick = null);
+            const isCorrect = selectedNum === currentAnswers.game2;
+            playFeedback(isCorrect, buttonElement);
+            if (isCorrect) {
+                setTimeout(setupGame2, 2000);
+            } else {
+                setTimeout(() => {
+                    buttonElement.classList.remove('incorrect');
+                    document.querySelectorAll('#game2-options button').forEach(b => {
+                        b.onclick = () => checkGame2(parseInt(b.textContent), b);
+                    });
+                }, 2000);
+            }
+        }
+        
+        // --- GAME 3: Kurang-kurangan ---
+        function setupGame3() {
+            const itemsArea = document.getElementById('game3-items');
+            const optionsArea = document.getElementById('game3-options');
+            const feedbackEl = document.getElementById('game3-feedback');
+            itemsArea.innerHTML = ''; optionsArea.innerHTML = ''; feedbackEl.textContent = '';
+            
+            const total = Math.floor(Math.random() * 7) + 3; // 3-9
+            const subtract = Math.floor(Math.random() * (total - 1)) + 1;
+            const answer = total - subtract;
+            currentAnswers.game3 = answer;
+            const itemKey = assetKeys[Math.floor(Math.random() * assetKeys.length)];
+
+            for (let i = 0; i < total; i++) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'w-16 h-16';
+                if (i < subtract) {
+                    itemDiv.classList.add('crossed-out');
+                }
+                itemDiv.innerHTML = assets[itemKey];
+                itemsArea.appendChild(itemDiv);
+            }
+            
+            const shuffledOptions = getOptions(answer, 9);
+            shuffledOptions.forEach(opt => {
+                optionsArea.appendChild(createNumberButton(opt, checkGame3));
+            });
+        }
+        
+        function checkGame3(selectedNum, buttonElement) {
+            document.querySelectorAll('#game3-options button').forEach(b => b.onclick = null);
+            const isCorrect = selectedNum === currentAnswers.game3;
+            playFeedback(isCorrect, buttonElement);
+            if (isCorrect) {
+                setTimeout(setupGame3, 2000);
+            } else {
+                 setTimeout(() => {
+                    buttonElement.classList.remove('incorrect');
+                     document.querySelectorAll('#game3-options button').forEach(b => {
+                        b.onclick = () => checkGame3(parseInt(b.textContent), b);
+                    });
+                }, 2000);
+            }
+        }
+        
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+           switchGame('game1');
+           document.body.addEventListener('click', () => synth.resume(), { once: true });
+        });
+    </script>
+</body>
+</html>
+
