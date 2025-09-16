@@ -3,855 +3,898 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Matematika TK (Unit 2 & 3)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>Permainan Matematika TK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* CSS untuk styling permainan */
         :root {
-            --bg-color: #F0F8FF;
-            --primary-color: #4A90E2;
-            --secondary-color: #50E3C2;
-            --accent-color: #F5A623;
-            --correct-color: #7ED321;
-            --incorrect-color: #D0021B;
-            --text-color: #333;
-            --white: #FFFFFF;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --bg-color: #f0f9ff;
+            --primary-color: #3b82f6;
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
+            --text-color: #1f2937;
+            --border-color: #d1d5db;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --font-family: 'Fredoka', sans-serif;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: var(--font-family);
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
             text-align: center;
         }
 
-        h1 {
-            font-family: 'Fredoka One', cursive;
+        header h1 {
             color: var(--primary-color);
             font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 0;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            margin-top: 5px;
         }
 
-        #game-nav {
+        /* Navigasi Pilihan Game */
+        #game-selection {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
+            margin: 20px 0;
+        }
+
+        .game-select-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-select-btn:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+        
+        .game-select-btn.active {
+            background-color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        /* Kontainer Utama Game */
+        #game-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .game-section {
+            display: none; /* Semua game disembunyikan awalnya */
+        }
+
+        .game-section.active {
+            display: block;
+        }
+        
+        .game-section h2 {
+            color: var(--accent-color);
+            font-size: 2rem;
+            border-bottom: 3px dashed var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        .instructions {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+
+        .speaker-icon {
+            cursor: pointer;
+            font-size: 1.5rem;
+            margin-left: 10px;
+            vertical-align: middle;
+            transition: transform 0.2s;
+        }
+
+        .speaker-icon:hover {
+            transform: scale(1.2);
+        }
+        
+        /* Area Permainan */
+        .game-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            min-height: 150px;
+            font-size: 4rem;
+            padding: 20px;
+            background-color: #fafafa;
+            border-radius: 15px;
             margin-bottom: 20px;
         }
 
-        .nav-btn {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            background-color: var(--primary-color);
-            color: var(--white);
-            border: none;
-            padding: 10px 15px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
-            font-size: 0.9rem;
-        }
-
-        .nav-btn:hover, .nav-btn.active {
-            background-color: var(--accent-color);
-            transform: translateY(-3px);
-        }
-
-        #game-container {
-            background-color: var(--white);
-            width: 100%;
-            max-width: 800px;
-            min-height: 450px;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: var(--shadow);
+        /* Tombol Jawaban */
+        .answer-options {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            gap: 20px;
-            box-sizing: border-box;
-            position: relative;
-        }
-        
-        #instruction-container {
-            display: flex;
-            align-items: center;
             gap: 15px;
-            margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
-        #speaker-btn {
-            background: none;
-            border: none;
+        .answer-btn {
+            min-width: 70px;
+            height: 70px;
+            font-size: 2.5rem;
+            font-weight: 600;
+            border-radius: 50%;
+            border: 4px solid var(--primary-color);
+            background-color: white;
+            color: var(--primary-color);
             cursor: pointer;
-            padding: 0;
-        }
-
-        #speaker-btn svg {
-            width: 40px;
-            height: 40px;
-            fill: var(--primary-color);
-            transition: transform 0.2s;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
-        #speaker-btn:hover svg {
+        .answer-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
             transform: scale(1.1);
         }
-
-        #speaker-btn.new-instruction svg {
-            animation: pulse 1.5s 2;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        #instruction-text {
-            font-size: 1.2rem;
+        
+        .feedback {
+            font-size: 1.5rem;
             font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .game-content {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .choice-btn {
-            font-family: 'Fredoka One', cursive;
-            font-size: 2rem;
-            width: 80px;
-            height: 80px;
-            border-radius: 15px;
-            border: 3px solid var(--primary-color);
-            background-color: var(--white);
-            color: var(--primary-color);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .choice-btn:hover {
-            background-color: var(--secondary-color);
-            color: var(--white);
-            border-color: var(--secondary-color);
-            transform: scale(1.05);
-        }
-        
-        .fruit-item, .animal-item, .rocket-item, .apple-item {
-            font-size: 4rem;
-            transition: transform 0.5s ease-out;
-        }
-        
-        /* Game 2 Styles */
-        .drop-zone {
-            width: 120px;
-            height: 120px;
-            border: 3px dashed var(--secondary-color);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px;
-            transition: background-color 0.3s;
-        }
-        .drop-zone.hovered {
-            background-color: #e0fff8;
-        }
-        .draggable {
-            font-family: 'Fredoka One', cursive;
-            font-size: 2.5rem;
-            width: 70px;
-            height: 70px;
-            background-color: var(--accent-color);
-            color: var(--white);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: grab;
-            user-select: none;
-        }
-        .draggable:active {
-            cursor: grabbing;
-        }
-        
-        /* Game 3 Styles */
-        #tower-container {
-            width: 100px;
-            height: 300px;
-            border: 2px solid #ccc;
-            border-top: none;
-            display: flex;
-            flex-direction: column-reverse;
-        }
-        .tower-block {
-            width: 100%;
+            margin-top: 20px;
             height: 30px;
-            background-color: var(--primary-color);
-            border: 1px solid var(--white);
-            box-sizing: border-box;
-        }
-        
-        /* Game 6 Ten Frame Styles */
-        .ten-frame {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            width: 300px;
-            border: 2px solid var(--text-color);
-            padding: 10px;
-            border-radius: 10px;
-        }
-        .ten-frame-cell {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #ccc;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .ten-frame-dot {
-            width: 40px;
-            height: 40px;
-            background-color: var(--accent-color);
-            border-radius: 50%;
-        }
-        
-        /* Game 8 Styles */
-        .number-sequence-box {
-            font-family: 'Fredoka One', cursive;
-            font-size: 2rem;
-            width: 60px;
-            height: 60px;
-            border: 2px solid #ccc;
-            border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin: 5px;
-        }
-        .missing {
-            background-color: #eee;
         }
 
-        /* General UI Elements */
+        .feedback.correct {
+            color: var(--success-color);
+        }
+
+        .feedback.incorrect {
+            color: var(--error-color);
+        }
+        
+        /* Tombol Aksi */
         .action-btn {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
             background-color: var(--secondary-color);
-            color: var(--white);
+            color: white;
             border: none;
             padding: 15px 30px;
-            border-radius: 12px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
-            font-size: 1.1rem;
-        }
-        .action-btn:hover {
-            filter: brightness(1.1);
-        }
-        .number-input {
-            font-family: 'Fredoka One', cursive;
-            font-size: 2rem;
-            width: 80px;
-            height: 80px;
-            text-align: center;
-            border: 3px solid var(--primary-color);
-            border-radius: 15px;
-        }
-
-        /* Modal Styles */
-        #feedback-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            padding: 40px;
-            border-radius: 20px;
-            color: var(--white);
-            font-family: 'Fredoka One', cursive;
-            font-size: 3rem;
-            text-align: center;
-        }
-        .modal-content.correct {
-            background-color: var(--correct-color);
-        }
-        .modal-content.incorrect {
-            background-color: var(--incorrect-color);
+            margin-top: 15px;
+            transition: background-color 0.3s;
         }
         
-        @media (max-width: 768px) {
-            h1 { font-size: 2rem; }
-            #game-container { padding: 20px; min-height: 400px; }
-            #instruction-text { font-size: 1rem; }
-            .ten-frame { width: 250px; }
-            .ten-frame-cell { width: 40px; height: 40px; }
-            .ten-frame-dot { width: 32px; height: 32px; }
+        .action-btn:hover {
+            background-color: #059669;
+        }
+
+        /* Styling Khusus untuk Game Tertentu */
+        /* Game 3 & 6: Five/Ten Frame */
+        .frame {
+            display: grid;
+            gap: 5px;
+            border: 3px solid var(--text-color);
+            padding: 10px;
+            background-color: #eef2ff;
+        }
+        .five-frame { grid-template-columns: repeat(5, 1fr); }
+        .ten-frame { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr); }
+        
+        .frame-cell {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        .frame-cell.filled::after {
+            content: '●';
+            font-size: 4rem;
+            color: var(--accent-color);
+            line-height: 1;
+        }
+
+        /* Game 7: Konsep Nol */
+        .bird {
+             transition: opacity 0.5s, transform 0.5s;
+        }
+        .bird.fly-away {
+            opacity: 0;
+            transform: translateY(-100px) scale(0.5);
+        }
+        
+        /* Game 8: Grafik Gambar */
+        .graph-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+        }
+        .graph-bar {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+        }
+        .graph-bar .item {
+            font-size: 2rem;
+        }
+        .graph-bar .label {
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+        
+        /* Game 4: Angka Hilang */
+        .number-sequence span {
+            padding: 0 10px;
         }
     </style>
 </head>
 <body>
 
-    <h1>Permainan Matematika Ceria!</h1>
-    <div id="game-nav"></div>
+    <header>
+        <h1>Permainan Matematika TK</h1>
+        <p>Berdasarkan Buku Matematika Singapura (Bab 2 & 3)</p>
+    </header>
 
-    <div id="game-container">
-        <div id="instruction-container">
-            <button id="speaker-btn">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M18.8795 8.33352C19.8663 9.43128 20.5 10.8784 20.5 12.4335C20.5 13.9887 19.8663 15.4358 18.8795 16.5335M16.4475 10.1113C16.9212 10.6433 17.205 11.416 17.205 12.4335C17.205 13.4511 16.9212 14.2238 16.4475 14.7558M12.5 5.5V19.5L9.5 15.5H5.5C4.39543 15.5 3.5 14.6046 3.5 13.5V11.5C3.5 10.3954 4.39543 9.5 5.5 9.5H9.5L12.5 5.5Z" stroke="#4A90E2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
-            </button>
-            <p id="instruction-text">Pilih permainan di atas untuk memulai!</p>
-        </div>
-        <div id="game-content-area" class="game-content">
-             <!-- Game content will be loaded here -->
-             <p>Selamat datang! Ayo kita belajar matematika sambil bermain. Klik salah satu tombol permainan di atas ya!</p>
-        </div>
-    </div>
-    
-    <div id="feedback-modal">
-        <div class="modal-content">
-            <span id="feedback-text"></span>
-        </div>
-    </div>
+    <nav id="game-selection">
+        <!-- Tombol navigasi akan dibuat oleh JavaScript -->
+    </nav>
 
-<script>
-    // --- Global Variables & Setup ---
-    const gameNav = document.getElementById('game-nav');
-    const gameContainer = document.getElementById('game-content-area');
-    const instructionText = document.getElementById('instruction-text');
-    const speakerBtn = document.getElementById('speaker-btn');
-    const modal = document.getElementById('feedback-modal');
-    const modalContent = modal.querySelector('.modal-content');
-    const feedbackText = document.getElementById('feedback-text');
+    <main id="game-container">
+        <!-- Setiap section adalah satu permainan -->
 
-    const synth = window.speechSynthesis;
-    let currentInstruction = 'Pilih permainan di atas untuk memulai!';
-    
-    const games = [
-        { id: 1, name: "1. Hitung Buah (1-5)", func: loadGame1 },
-        { id: 2, name: "2. Mencocokkan Angka (1-5)", func: loadGame2 },
-        { id: 3, name: "3. Membangun Menara", func: loadGame3 },
-        { id: 4, name: "4. Grafik Mainan", func: loadGame4 },
-        { id: 5, name: "5. Hitung Hewan Laut (6-10)", func: loadGame5 },
-        { id: 6, name: "6. Isi Ten Frame (6-10)", func: loadGame6 },
-        { id: 7, name: "7. Berhitung Mundur", func: loadGame7 },
-        { id: 8, name: "8. Angka yang Hilang", func: loadGame8 },
-        { id: 9, name: "9. Apa Itu Nol?", func: loadGame9 },
-        { id: 10, name: "10. Tulis Angka", func: loadGame10 },
-    ];
+        <!-- Game 1: Menghitung Hewan (1-5) -->
+        <section id="game-1" class="game-section">
+            <h2>1. Menghitung Hewan</h2>
+            <p class="instructions" data-instruction-text="Ada berapa hewan di bawah ini?">Ada berapa hewan di bawah ini?<span class="speaker-icon">🔊</span></p>
+            <div class="game-area" id="g1-game-area"></div>
+            <div class="answer-options" id="g1-answer-options"></div>
+            <p class="feedback" id="g1-feedback"></p>
+            <button class="action-btn" id="g1-next-btn">Soal Berikutnya</button>
+        </section>
 
-    // --- Utility Functions ---
-    
-    function speak(text, rate = 0.9, pitch = 1.1) {
-        if (synth.speaking) {
-            synth.cancel();
-        }
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'id-ID';
-        utterance.rate = rate;
-        utterance.pitch = pitch;
-        synth.speak(utterance);
-    }
-
-    function updateInstruction(text) {
-        currentInstruction = text;
-        instructionText.textContent = text;
-        // Menambahkan animasi ke tombol speaker untuk menandakan ada instruksi baru
-        speakerBtn.classList.add('new-instruction');
-        setTimeout(() => {
-            speakerBtn.classList.remove('new-instruction');
-        }, 3000); // Hapus animasi setelah 3 detik
-    }
-    
-    function showFeedback(correct, nextGameFunc) {
-        modal.style.display = 'flex';
-        if (correct) {
-            modalContent.className = 'modal-content correct';
-            feedbackText.textContent = 'Hebat!';
-            speak('Hebat!');
-        } else {
-            modalContent.className = 'modal-content incorrect';
-            feedbackText.textContent = 'Coba Lagi!';
-            speak('Coba lagi ya!');
-        }
-        
-        setTimeout(() => {
-            modal.style.display = 'none';
-            if (correct && nextGameFunc) {
-                nextGameFunc();
-            }
-        }, 1500);
-    }
-    
-    function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    // --- Game Loading Functions ---
-
-    function clearGameContainer() {
-        gameContainer.innerHTML = '';
-    }
-    
-    function switchGame(gameFunc, buttonEl) {
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        buttonEl.classList.add('active');
-        clearGameContainer();
-        gameFunc();
-    }
-
-    // Game 1: Hitung Buah (1-5)
-    function loadGame1() {
-        const fruits = ['🍎', '🍌', '🍊', '🍇', '🍓'];
-        const numToCount = getRandomInt(1, 5);
-        const selectedFruit = fruits[getRandomInt(0, fruits.length - 1)];
-        
-        let displayHTML = '';
-        for (let i = 0; i < numToCount; i++) {
-            displayHTML += `<span class="fruit-item">${selectedFruit}</span>`;
-        }
-        
-        const choices = shuffleArray([numToCount, getRandomInt(1,5, [numToCount]), getRandomInt(1,5, [numToCount, numToCount])]);
-        let choicesHTML = '<div style="width:100%; display:flex; justify-content:center; gap:15px;">';
-        
-        let uniqueChoices = [...new Set(choices)];
-        while (uniqueChoices.length < 3) {
-            let newNum = getRandomInt(1,5);
-            if (!uniqueChoices.includes(newNum)) {
-                uniqueChoices.push(newNum);
-            }
-        }
-        if (!uniqueChoices.includes(numToCount)) {
-            uniqueChoices[getRandomInt(0,2)] = numToCount;
-        }
-
-        shuffleArray(uniqueChoices).forEach(choice => {
-            choicesHTML += `<button class="choice-btn" data-answer="${choice}">${choice}</button>`;
-        });
-        choicesHTML += '</div>';
-        
-        gameContainer.innerHTML = `<div class="game-content">${displayHTML}</div>${choicesHTML}`;
-        updateInstruction('Halo! Ayo kita hitung buah-buahan ini. Ada berapa ya? Klik angka yang benar!');
-
-        gameContainer.querySelectorAll('.choice-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const isCorrect = parseInt(btn.dataset.answer) === numToCount;
-                showFeedback(isCorrect, loadGame1);
-            });
-        });
-    }
-
-    // Game 2: Mencocokkan Angka (1-5)
-    function loadGame2() {
-        updateInstruction('Sekarang, ayo pasangkan jumlah benda dengan angkanya. Tarik angkanya ke kotak yang tepat!');
-        
-        const items = ['⚽️', '⭐', '❤️', '🚗', '🔑'];
-        let numbers = shuffleArray([1, 2, 3, 4, 5]);
-        const questionCount = 3;
-        let correctMatches = 0;
-
-        let gameHTML = '<div style="display:flex; justify-content:space-around; width:100%; align-items:flex-start;"><div id="draggables">';
-        
-        for (let i = 0; i < questionCount; i++) {
-            gameHTML += `<div class="draggable" draggable="true" data-value="${numbers[i]}">${numbers[i]}</div>`;
-        }
-        gameHTML += '</div><div id="drop-zones">';
-        
-        let dropNumbers = numbers.slice(0, questionCount);
-        shuffleArray(dropNumbers);
-
-        for (let i = 0; i < questionCount; i++) {
-            let num = dropNumbers[i];
-            let item = items[num-1];
-            gameHTML += `<div class="drop-zone" data-value="${num}">${item.repeat(num)}</div>`;
-        }
-        gameHTML += '</div></div>';
-        gameContainer.innerHTML = gameHTML;
-        
-        let draggedItem = null;
-
-        gameContainer.querySelectorAll('.draggable').forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                draggedItem = e.target;
-                setTimeout(() => e.target.style.display = 'none', 0);
-            });
-            item.addEventListener('dragend', (e) => {
-                setTimeout(() => {
-                    if (draggedItem) {
-                       draggedItem.style.display = 'flex';
-                       draggedItem = null;
-                    }
-                }, 0);
-            });
-        });
-
-        gameContainer.querySelectorAll('.drop-zone').forEach(zone => {
-            zone.addEventListener('dragover', e => e.preventDefault());
-            zone.addEventListener('dragenter', e => { e.preventDefault(); zone.classList.add('hovered'); });
-            zone.addEventListener('dragleave', () => zone.classList.remove('hovered'));
-            zone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                zone.classList.remove('hovered');
-                if (draggedItem && zone.dataset.value === draggedItem.dataset.value) {
-                    zone.innerHTML = '';
-                    zone.appendChild(draggedItem);
-                    draggedItem.setAttribute('draggable', 'false');
-                    draggedItem.style.cursor = 'default';
-                    draggedItem = null;
-                    correctMatches++;
-                    if (correctMatches === questionCount) {
-                        showFeedback(true, loadGame2);
-                    }
-                }
-            });
-        });
-    }
-
-    // Game 3: Membangun Menara
-    function loadGame3() {
-        const targetHeight = getRandomInt(2, 5);
-        updateInstruction(`Ayo kita bangun menara! Buatlah menara setinggi ${targetHeight} balok! Klik tombol 'Tambah Balok' ya.`);
-        
-        gameContainer.innerHTML = `
-            <div id="tower-container"></div>
-            <p>Jumlah balok: <span id="block-count">0</span></p>
-            <div>
-                <button id="add-btn" class="action-btn">Tambah Balok</button>
-                <button id="check-btn" class="action-btn">Periksa</button>
+        <!-- Game 2: Mencocokkan Angka & Benda (1-5) -->
+        <section id="game-2" class="game-section">
+            <h2>2. Mencocokkan Angka</h2>
+            <p class="instructions" data-instruction-text="Klik kelompok benda yang jumlahnya sama dengan angka di samping!">Klik kelompok benda yang jumlahnya sama dengan angka di samping!<span class="speaker-icon">🔊</span></p>
+            <div class="game-area" id="g2-game-area" style="font-size: 2.5rem; justify-content: space-around; width:100%; align-items: center;">
+                <div id="g2-number" style="font-size: 6rem; font-weight: bold; color: var(--primary-color);"></div>
+                <div id="g2-object-options" style="display:flex; flex-direction:column; gap: 15px;"></div>
             </div>
-        `;
-        
-        const towerContainer = document.getElementById('tower-container');
-        const blockCountSpan = document.getElementById('block-count');
-        let currentBlocks = 0;
+            <p class="feedback" id="g2-feedback"></p>
+            <button class="action-btn" id="g2-next-btn">Soal Berikutnya</button>
+        </section>
 
-        document.getElementById('add-btn').addEventListener('click', () => {
-            if (currentBlocks < 10) {
-                currentBlocks++;
-                const block = document.createElement('div');
-                block.className = 'tower-block';
-                towerContainer.appendChild(block);
-                blockCountSpan.textContent = currentBlocks;
-            }
-        });
-
-        document.getElementById('check-btn').addEventListener('click', () => {
-            const isCorrect = currentBlocks === targetHeight;
-            showFeedback(isCorrect, loadGame3);
-        });
-    }
-
-    // Game 4: Grafik Mainan
-    function loadGame4() {
-        const toys = { ' mobil balap 🏎️': getRandomInt(1, 5), ' boneka 🧸': getRandomInt(1, 5), ' robot 🤖': getRandomInt(1, 5) };
-        const toyKeys = Object.keys(toys);
-        const questionToy = toyKeys[getRandomInt(0, toyKeys.length - 1)];
-        const answer = toys[questionToy];
-
-        updateInstruction(`Lihat grafik mainan ini. Coba hitung, ada berapa ${questionToy}? Tulis jawabanmu di kotak ya.`);
-
-        let graphHTML = '<div style="width: 100%;">';
-        for (const toy in toys) {
-            graphHTML += `<div style="display:flex; align-items:center; margin-bottom:10px;"><span style="width:120px; text-align:right; margin-right:10px;">${toy}</span>`;
-            for (let i = 0; i < toys[toy]; i++) {
-                graphHTML += `<span style="font-size: 2rem;">${toy.split(' ')[2]}</span>`;
-            }
-            graphHTML += '</div>';
-        }
-        graphHTML += '</div>';
-
-        gameContainer.innerHTML = `
-            ${graphHTML}
-            <div style="display:flex; align-items:center; gap:15px; margin-top: 20px;">
-                <p style="font-size:1.2rem;">Ada berapa ${questionToy}?</p>
-                <input type="number" class="number-input" id="graph-answer">
-                <button class="action-btn" id="check-graph-btn">Cek</button>
+        <!-- Game 3: Mengisi Five Frame -->
+        <section id="game-3" class="game-section">
+            <h2>3. Mengisi Five Frame</h2>
+            <p class="instructions">Isi kotak di bawah ini sampai berjumlah <strong id="g3-target-number" style="color:var(--primary-color);"></strong>!<span class="speaker-icon">🔊</span></p>
+            <div class="game-area">
+                <div class="frame five-frame" id="g3-five-frame"></div>
             </div>
-        `;
-        
-        document.getElementById('check-graph-btn').addEventListener('click', () => {
-            const userAnswer = parseInt(document.getElementById('graph-answer').value);
-            showFeedback(userAnswer === answer, loadGame4);
-        });
-    }
+            <p class="feedback" id="g3-feedback"></p>
+            <button class="action-btn" id="g3-check-btn">Periksa Jawaban</button>
+            <button class="action-btn" id="g3-next-btn" style="display:none;">Soal Berikutnya</button>
+        </section>
 
-    // Game 5: Hitung Hewan Laut (6-10)
-    function loadGame5() {
-        const animals = ['🐠', '🐙', '🦀', '🐬', '🐳'];
-        const numToCount = getRandomInt(6, 10);
-        const selectedAnimal = animals[getRandomInt(0, animals.length - 1)];
+        <!-- Game 4: Angka yang Hilang (1-10) -->
+        <section id="game-4" class="game-section">
+            <h2>4. Menebak Angka Hilang</h2>
+            <p class="instructions" data-instruction-text="Angka berapa yang hilang dari urutan di bawah ini?">Angka berapa yang hilang dari urutan di bawah ini?<span class="speaker-icon">🔊</span></p>
+            <div class="game-area number-sequence" id="g4-game-area"></div>
+            <div class="answer-options" id="g4-answer-options"></div>
+            <p class="feedback" id="g4-feedback"></p>
+            <button class="action-btn" id="g4-next-btn">Soal Berikutnya</button>
+        </section>
         
-        let displayHTML = '';
-        for (let i = 0; i < numToCount; i++) {
-            displayHTML += `<span class="animal-item">${selectedAnimal}</span>`;
-        }
+        <!-- Game 5: Menghitung Benda (1-10) -->
+        <section id="game-5" class="game-section">
+            <h2>5. Menghitung Benda</h2>
+            <p class="instructions" data-instruction-text="Ayo hitung ada berapa jumlah benda berikut!">Ayo hitung ada berapa jumlah benda berikut!<span class="speaker-icon">🔊</span></p>
+            <div class="game-area" id="g5-game-area" style="font-size:3rem"></div>
+            <div class="answer-options" id="g5-answer-options"></div>
+            <p class="feedback" id="g5-feedback"></p>
+            <button class="action-btn" id="g5-next-btn">Soal Berikutnya</button>
+        </section>
         
-        let uniqueChoices = [numToCount];
-        while (uniqueChoices.length < 3) {
-            let newNum = getRandomInt(6, 10);
-            if (!uniqueChoices.includes(newNum)) uniqueChoices.push(newNum);
-        }
+        <!-- Game 6: Mengisi Ten Frame -->
+        <section id="game-6" class="game-section">
+            <h2>6. Mengisi Ten Frame</h2>
+            <p class="instructions">Isi kotak di bawah ini sampai berjumlah <strong id="g6-target-number" style="color:var(--primary-color);"></strong>!<span class="speaker-icon">🔊</span></p>
+            <div class="game-area">
+                <div class="frame ten-frame" id="g6-ten-frame"></div>
+            </div>
+            <p class="feedback" id="g6-feedback"></p>
+            <button class="action-btn" id="g6-check-btn">Periksa Jawaban</button>
+            <button class="action-btn" id="g6-next-btn" style="display:none;">Soal Berikutnya</button>
+        </section>
         
-        let choicesHTML = '<div style="width:100%; display:flex; justify-content:center; gap:15px;">';
-        shuffleArray(uniqueChoices).forEach(choice => {
-            choicesHTML += `<button class="choice-btn" data-answer="${choice}">${choice}</button>`;
-        });
-        choicesHTML += '</div>';
-        
-        gameContainer.innerHTML = `<div class="game-content">${displayHTML}</div>${choicesHTML}`;
-        updateInstruction('Wow, lihat hewan laut yang lucu ini! Yuk, kita hitung bersama. Klik angka yang sesuai ya!');
+        <!-- Game 7: Konsep Nol -->
+        <section id="game-7" class="game-section">
+            <h2>7. Konsep Angka Nol</h2>
+            <p class="instructions">Ada <span id="g7-bird-count"></span> burung di pagar. Klik tombol untuk membuatnya terbang!<span class="speaker-icon">🔊</span></p>
+            <div class="game-area" id="g7-game-area"></div>
+            <button class="action-btn" id="g7-fly-btn">Terbang!</button>
+            <div id="g7-question" style="display:none; margin-top:20px;">
+                <p class="instructions" data-instruction-text="Sekarang, ada berapa burung di pagar?">Sekarang, ada berapa burung di pagar?<span class="speaker-icon">🔊</span></p>
+                <div class="answer-options" id="g7-answer-options"></div>
+            </div>
+            <p class="feedback" id="g7-feedback"></p>
+            <button class="action-btn" id="g7-reset-btn" style="display:none;">Main Lagi</button>
+        </section>
 
-        gameContainer.querySelectorAll('.choice-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const isCorrect = parseInt(btn.dataset.answer) === numToCount;
-                showFeedback(isCorrect, loadGame5);
-            });
-        });
-    }
-
-    // Game 6: Isi Ten Frame (6-10)
-    function loadGame6() {
-        const targetNumber = getRandomInt(6, 10);
-        updateInstruction(`Ayo kita bermain dengan Ten Frame! Coba tunjukkan angka ${targetNumber} dengan mengisi titik pada kotak.`);
-
-        let tenFrameHTML = '<div class="ten-frame">';
-        for (let i = 0; i < 10; i++) {
-            tenFrameHTML += '<div class="ten-frame-cell"></div>';
-        }
-        tenFrameHTML += '</div>';
-
-        gameContainer.innerHTML = `
-            ${tenFrameHTML}
-            <button class="action-btn" id="check-ten-frame-btn">Periksa</button>
-        `;
+        <!-- Game 8: Grafik Gambar Sederhana -->
+        <section id="game-8" class="game-section">
+            <h2>8. Membaca Grafik Gambar</h2>
+            <p class="instructions" data-instruction-text="Perhatikan grafik buah di bawah ini. Lalu jawab pertanyaannya!">Perhatikan grafik buah di bawah ini. Lalu jawab pertanyaannya!<span class="speaker-icon">🔊</span></p>
+            <div class="game-area" id="g8-game-area">
+                <div class="graph-container" id="g8-graph-container"></div>
+            </div>
+            <p class="instructions" id="g8-question"></p>
+            <div class="answer-options" id="g8-answer-options"></div>
+            <p class="feedback" id="g8-feedback"></p>
+            <button class="action-btn" id="g8-next-btn">Soal Berikutnya</button>
+        </section>
         
-        let dotCount = 0;
-        const cells = gameContainer.querySelectorAll('.ten-frame-cell');
-        cells.forEach(cell => {
-            cell.addEventListener('click', () => {
-                if (cell.innerHTML === '') {
-                    cell.innerHTML = '<div class="ten-frame-dot"></div>';
-                    dotCount++;
-                } else {
-                    cell.innerHTML = '';
-                    dotCount--;
+        <!-- Game 9: Menghitung Jari -->
+        <section id="game-9" class="game-section">
+            <h2>9. Menghitung Jari</h2>
+            <p class="instructions" data-instruction-text="Berapa jumlah jari yang ditunjukkan?">Berapa jumlah jari yang ditunjukkan?<span class="speaker-icon">🔊</span></p>
+            <div class="game-area" id="g9-game-area"></div>
+            <div class="answer-options" id="g9-answer-options"></div>
+            <p class="feedback" id="g9-feedback"></p>
+            <button class="action-btn" id="g9-next-btn">Soal Berikutnya</button>
+        </section>
+
+        <!-- Game 10: Mana yang Berbeda? -->
+        <section id="game-10" class="game-section">
+            <h2>10. Mana Jumlah yang Berbeda?</h2>
+            <p class="instructions" data-instruction-text="Klik kelompok benda yang jumlahnya berbeda dari yang lain!">Klik kelompok benda yang jumlahnya berbeda dari yang lain!<span class="speaker-icon">🔊</span></p>
+            <div class="game-area" id="g10-game-area" style="gap: 30px;"></div>
+            <p class="feedback" id="g10-feedback"></p>
+            <button class="action-btn" id="g10-next-btn">Soal Berikutnya</button>
+        </section>
+
+    </main>
+
+    <script>
+        // JavaScript untuk logika permainan
+        document.addEventListener('DOMContentLoaded', () => {
+            const games = [
+                { id: 1, name: 'Hitung Hewan', init: initGame1 },
+                { id: 2, name: 'Cocokkan Angka', init: initGame2 },
+                { id: 3, name: 'Five Frame', init: initGame3 },
+                { id: 4, name: 'Angka Hilang', init: initGame4 },
+                { id: 5, name: 'Hitung Benda', init: initGame5 },
+                { id: 6, name: 'Ten Frame', init: initGame6 },
+                { id: 7, name: 'Konsep Nol', init: initGame7 },
+                { id: 8, name: 'Grafik Gambar', init: initGame8 },
+                { id: 9, name: 'Hitung Jari', init: initGame9 },
+                { id: 10, name: 'Jumlah Berbeda', init: initGame10 },
+            ];
+
+            const gameSelectionContainer = document.getElementById('game-selection');
+            let currentCorrectAnswer = null;
+
+            // --- Fungsi Utilitas ---
+            const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+            const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
+
+            // --- Fungsi Suara ---
+            const synth = window.speechSynthesis;
+            function speak(text) {
+                if (synth.speaking) {
+                    synth.cancel(); // Hentikan suara sebelumnya jika masih ada
                 }
-            });
-        });
+                const utterThis = new SpeechSynthesisUtterance(text);
+                utterThis.lang = 'id-ID';
+                utterThis.pitch = 1.1;
+                utterThis.rate = 0.9;
+                synth.speak(utterThis);
+            }
 
-        document.getElementById('check-ten-frame-btn').addEventListener('click', () => {
-            showFeedback(dotCount === targetNumber, loadGame6);
-        });
-    }
-    
-    // Game 7: Berhitung Mundur
-    function loadGame7() {
-        updateInstruction('Kita akan meluncurkan roket! Tekan tombol \'Luncurkan\' untuk memulai hitung mundur dari sepuluh!');
-
-        let rocketsHTML = '<div id="launchpad" class="game-content" style="height: 150px;">';
-        for(let i=0; i < 10; i++) {
-            rocketsHTML += `<span class="rocket-item" id="rocket-${10-i}">🚀</span>`;
-        }
-        rocketsHTML += '</div>';
-
-        gameContainer.innerHTML = `
-            ${rocketsHTML}
-            <p style="font-size:2rem; font-family: 'Fredoka One', cursive;"><span id="countdown-num">10</span></p>
-            <button class="action-btn" id="launch-btn">Luncurkan!</button>
-        `;
-        
-        let count = 10;
-        const countdownNum = document.getElementById('countdown-num');
-        const launchBtn = document.getElementById('launch-btn');
-
-        launchBtn.addEventListener('click', () => {
-            if (count > 0) {
-                const rocket = document.getElementById(`rocket-${count}`);
-                rocket.style.transform = 'translateY(-200px)';
-                rocket.style.opacity = '0';
-                count--;
-                countdownNum.textContent = count;
-                speak(String(count+1));
+            // --- Navigasi Game ---
+            function showGame(gameId) {
+                document.querySelectorAll('.game-section').forEach(section => section.classList.remove('active'));
+                document.getElementById(`game-${gameId}`).classList.add('active');
                 
-                if(count === 0) {
-                   setTimeout(()=> speak("Semua roket berhasil meluncur!"), 500);
-                   launchBtn.textContent = "Ulangi";
+                document.querySelectorAll('.game-select-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`.game-select-btn[data-game-id="${gameId}"]`).classList.add('active');
+
+                // Inisialisasi game yang dipilih
+                const game = games.find(g => g.id === gameId);
+                if (game && game.init) {
+                    game.init();
                 }
-            } else {
-                loadGame7();
             }
-        });
-    }
-    
-    // Game 8: Angka yang Hilang
-    function loadGame8() {
-        const start = getRandomInt(1, 5);
-        const sequence = Array.from({length: 5}, (_, i) => i + start);
-        const missingIndex = getRandomInt(1, 3);
-        const answer = sequence[missingIndex];
-        
-        updateInstruction('Oh tidak! Ada angka yang hilang dari barisan ini. Angka berapakah yang seharusnya ada di sana?');
-
-        let sequenceHTML = '<div class="game-content">';
-        sequence.forEach((num, index) => {
-            if (index === missingIndex) {
-                sequenceHTML += '<div class="number-sequence-box missing">?</div>';
-            } else {
-                sequenceHTML += `<div class="number-sequence-box">${num}</div>`;
-            }
-        });
-        sequenceHTML += '</div>';
-
-        let choices = [answer];
-        while(choices.length < 3) {
-            let wrongChoice = getRandomInt(start, start + 4);
-            if (!choices.includes(wrongChoice)) {
-                choices.push(wrongChoice);
-            }
-        }
-        shuffleArray(choices);
-
-        let choicesHTML = '<div style="width:100%; display:flex; justify-content:center; gap:15px; margin-top:20px;">';
-        choices.forEach(choice => {
-            choicesHTML += `<button class="choice-btn" data-answer="${choice}">${choice}</button>`;
-        });
-        choicesHTML += '</div>';
-
-        gameContainer.innerHTML = sequenceHTML + choicesHTML;
-        
-        gameContainer.querySelectorAll('.choice-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                showFeedback(parseInt(btn.dataset.answer) === answer, loadGame8);
+            
+            // Membuat tombol seleksi game
+            games.forEach(game => {
+                const button = document.createElement('button');
+                button.textContent = `${game.id}. ${game.name}`;
+                button.className = 'game-select-btn';
+                button.dataset.gameId = game.id;
+                button.addEventListener('click', () => showGame(game.id));
+                gameSelectionContainer.appendChild(button);
             });
-        });
-    }
 
-    // Game 9: Apa Itu Nol?
-    function loadGame9() {
-        updateInstruction('Ada tiga apel di pohon. Ayo kita makan satu per satu. Klik tombol \'Makan Apel\' dan lihat apa yang terjadi dengan jumlahnya!');
-        
-        gameContainer.innerHTML = `
-            <div id="tree" class="game-content" style="font-size:3rem; min-height:100px;">
-                🌳 <span class="apple-item">🍎</span> <span class="apple-item">🍎</span> <span class="apple-item">🍎</span>
-            </div>
-            <p style="font-size:1.5rem">Jumlah apel: <span id="apple-count">3</span></p>
-            <button class="action-btn" id="eat-apple-btn">Makan Apel</button>
-        `;
-        
-        let appleCount = 3;
-        const appleCountSpan = document.getElementById('apple-count');
-        const eatBtn = document.getElementById('eat-apple-btn');
-        const tree = document.getElementById('tree');
+            // Tambahkan event listener untuk semua ikon speaker
+            document.querySelectorAll('.speaker-icon').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    // Dapatkan teks dari elemen parent atau dari data-attribute
+                    let textToSpeak = e.target.parentElement.dataset.instructionText;
+                    if (!textToSpeak) {
+                         // Untuk instruksi dinamis, kita rakit kembali teksnya
+                        const parent = e.target.parentElement;
+                        if(parent.querySelector('strong')) {
+                           textToSpeak = parent.textContent.replace('🔊','').replace(parent.querySelector('strong').textContent, ` ${parent.querySelector('strong').textContent} `);
+                        } else {
+                            textToSpeak = parent.textContent.replace('🔊','');
+                        }
+                    }
+                    speak(textToSpeak);
+                });
+            });
 
-        eatBtn.addEventListener('click', () => {
-            if (appleCount > 0) {
-                appleCount--;
-                appleCountSpan.textContent = appleCount;
-                tree.querySelector('.apple-item').remove();
-                speak(`Sekarang tinggal ${appleCount}`);
-                if (appleCount === 0) {
-                    setTimeout(() => {
-                        updateInstruction('Apelnya sudah habis! Jumlahnya nol. Nol artinya tidak ada sama sekali. Hebat!');
-                        eatBtn.textContent = 'Main Lagi';
-                    }, 1000);
+
+            // --- Logika Game 1: Menghitung Hewan (1-5) ---
+            function initGame1() {
+                const gameArea = document.getElementById('g1-game-area');
+                const answerOptions = document.getElementById('g1-answer-options');
+                const feedback = document.getElementById('g1-feedback');
+                const animals = ['🐶', '🐱', '🐰', '🦊', '🐻'];
+                
+                feedback.textContent = '';
+                gameArea.innerHTML = '';
+                answerOptions.innerHTML = '';
+
+                const animalType = animals[getRandomInt(0, animals.length - 1)];
+                const correctCount = getRandomInt(1, 5);
+                currentCorrectAnswer = correctCount;
+
+                for (let i = 0; i < correctCount; i++) {
+                    gameArea.textContent += animalType;
                 }
-            } else {
-                loadGame9();
+
+                let options = [correctCount];
+                while (options.length < 3) {
+                    let randomOption = getRandomInt(1, 5);
+                    if (!options.includes(randomOption)) {
+                        options.push(randomOption);
+                    }
+                }
+                
+                shuffleArray(options).forEach(opt => {
+                    const button = document.createElement('button');
+                    button.textContent = opt;
+                    button.className = 'answer-btn';
+                    button.addEventListener('click', () => checkAnswer(opt, currentCorrectAnswer, feedback));
+                    answerOptions.appendChild(button);
+                });
+                speak("Ada berapa hewan di bawah ini?");
             }
-        });
-    }
-    
-    // Game 10: Tulis Angka
-    function loadGame10() {
-        const items = ['⭐', '❤️', '💎', '🌙', '☀️', '🌸'];
-        const numToWrite = getRandomInt(1, 10);
-        const item = items[getRandomInt(0, items.length - 1)];
+            document.getElementById('g1-next-btn').addEventListener('click', initGame1);
 
-        updateInstruction('Permainan terakhir! Hitung benda-benda ini, lalu ketik angkanya di dalam kotak. Kamu pasti bisa!');
+            // --- Logika Game 2: Mencocokkan Angka & Benda (1-5) ---
+            function initGame2() {
+                const numberDiv = document.getElementById('g2-number');
+                const objectOptionsDiv = document.getElementById('g2-object-options');
+                const feedback = document.getElementById('g2-feedback');
+                const objects = ['🍎', '🍌', '🍊', '🍓', '🍇'];
 
-        let displayHTML = '<div class="game-content">';
-        for (let i = 0; i < numToWrite; i++) {
-            displayHTML += `<span style="font-size:3rem">${item}</span>`;
-        }
-        displayHTML += '</div>';
+                feedback.textContent = '';
+                objectOptionsDiv.innerHTML = '';
 
-        gameContainer.innerHTML = `
-            ${displayHTML}
-            <div style="display:flex; align-items:center; gap:15px; margin-top: 20px;">
-                <input type="number" class="number-input" id="write-answer">
-                <button class="action-btn" id="check-write-btn">Cek</button>
-            </div>
-        `;
-        
-        document.getElementById('check-write-btn').addEventListener('click', () => {
-            const userAnswer = parseInt(document.getElementById('write-answer').value);
-            showFeedback(userAnswer === numToWrite, loadGame10);
-        });
-    }
+                const targetNumber = getRandomInt(1, 5);
+                currentCorrectAnswer = targetNumber;
+                numberDiv.textContent = targetNumber;
 
+                let options = [targetNumber];
+                while (options.length < 3) {
+                    let r = getRandomInt(1, 5);
+                    if (!options.includes(r)) options.push(r);
+                }
 
-    // --- Initialization ---
-    function init() {
-        games.forEach(game => {
-            const btn = document.createElement('button');
-            btn.className = 'nav-btn';
-            btn.textContent = game.name;
-            btn.addEventListener('click', () => switchGame(game.func, btn));
-            gameNav.appendChild(btn);
-        });
-
-        speakerBtn.addEventListener('click', () => speak(currentInstruction));
-        
-        // Ensure voices are loaded
-        let voiceInterval = setInterval(() => {
-            if (synth.getVoices().length !== 0) {
-                console.log("Voices loaded.");
-                clearInterval(voiceInterval);
+                shuffleArray(options).forEach(opt => {
+                    const button = document.createElement('button');
+                    const objectType = objects[getRandomInt(0, objects.length-1)];
+                    button.textContent = objectType.repeat(opt);
+                    button.className = 'answer-btn';
+                    button.style.width = 'auto';
+                    button.style.padding = '0 20px';
+                    button.style.borderRadius = '20px';
+                    button.addEventListener('click', () => checkAnswer(opt, currentCorrectAnswer, feedback));
+                    objectOptionsDiv.appendChild(button);
+                });
+                speak("Klik kelompok benda yang jumlahnya sama dengan angka di samping!");
             }
-        }, 10);
-    }
+            document.getElementById('g2-next-btn').addEventListener('click', initGame2);
 
-    window.onload = init;
+            // --- Logika Game 3: Mengisi Five Frame ---
+            function initGame3() {
+                const targetNumberEl = document.getElementById('g3-target-number');
+                const frame = document.getElementById('g3-five-frame');
+                const feedback = document.getElementById('g3-feedback');
+                const checkBtn = document.getElementById('g3-check-btn');
+                const nextBtn = document.getElementById('g3-next-btn');
+                
+                feedback.textContent = '';
+                frame.innerHTML = '';
+                checkBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'none';
 
-</script>
+                const targetNumber = getRandomInt(1, 5);
+                currentCorrectAnswer = targetNumber;
+                targetNumberEl.textContent = targetNumber;
+
+                for (let i = 0; i < 5; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'frame-cell';
+                    cell.addEventListener('click', () => cell.classList.toggle('filled'));
+                    frame.appendChild(cell);
+                }
+                speak(`Isi kotak di bawah ini sampai berjumlah ${targetNumber}`);
+            }
+            document.getElementById('g3-check-btn').addEventListener('click', () => {
+                const filledCount = document.querySelectorAll('#g3-five-frame .filled').length;
+                const feedback = document.getElementById('g3-feedback');
+                checkAnswer(filledCount, currentCorrectAnswer, feedback);
+                 if(filledCount === currentCorrectAnswer){
+                   document.getElementById('g3-check-btn').style.display = 'none';
+                   document.getElementById('g3-next-btn').style.display = 'inline-block';
+                }
+            });
+            document.getElementById('g3-next-btn').addEventListener('click', initGame3);
+
+            // --- Logika Game 4: Angka Hilang (1-10) ---
+            function initGame4() {
+                const gameArea = document.getElementById('g4-game-area');
+                const answerOptions = document.getElementById('g4-answer-options');
+                const feedback = document.getElementById('g4-feedback');
+
+                feedback.textContent = '';
+                gameArea.innerHTML = '';
+                answerOptions.innerHTML = '';
+
+                const start = getRandomInt(1, 6);
+                const sequence = Array.from({length: 5}, (_, i) => start + i);
+                const missingIndex = getRandomInt(1, 3);
+                const missingNumber = sequence[missingIndex];
+                currentCorrectAnswer = missingNumber;
+
+                sequence[missingIndex] = '___';
+                gameArea.innerHTML = sequence.map(n => `<span>${n}</span>`).join('');
+                
+                let options = [missingNumber];
+                while(options.length < 3) {
+                    let r = getRandomInt(1, 10);
+                    if (!options.includes(r)) options.push(r);
+                }
+                
+                shuffleArray(options).forEach(opt => {
+                    const button = document.createElement('button');
+                    button.textContent = opt;
+                    button.className = 'answer-btn';
+                    button.addEventListener('click', () => checkAnswer(opt, currentCorrectAnswer, feedback));
+                    answerOptions.appendChild(button);
+                });
+                speak("Angka berapa yang hilang dari urutan di bawah ini?");
+            }
+            document.getElementById('g4-next-btn').addEventListener('click', initGame4);
+
+            // --- Logika Game 5: Menghitung Benda (1-10) ---
+            function initGame5() {
+                const gameArea = document.getElementById('g5-game-area');
+                const answerOptions = document.getElementById('g5-answer-options');
+                const feedback = document.getElementById('g5-feedback');
+                const items = ['⭐', '🎈', '⚽', '🎁', '🚗'];
+                
+                feedback.textContent = '';
+                gameArea.innerHTML = '';
+                answerOptions.innerHTML = '';
+
+                const itemType = items[getRandomInt(0, items.length - 1)];
+                const correctCount = getRandomInt(1, 10);
+                currentCorrectAnswer = correctCount;
+
+                for (let i = 0; i < correctCount; i++) {
+                    gameArea.textContent += itemType;
+                }
+
+                let options = [correctCount];
+                while (options.length < 4) {
+                    let randomOption = getRandomInt(1, 10);
+                    if (!options.includes(randomOption)) {
+                        options.push(randomOption);
+                    }
+                }
+                
+                answerOptions.style.flexWrap = 'wrap';
+                shuffleArray(options).forEach(opt => {
+                    const button = document.createElement('button');
+                    button.textContent = opt;
+                    button.className = 'answer-btn';
+                    button.style.minWidth = '60px';
+                    button.style.height = '60px';
+                    button.style.fontSize = '2rem';
+                    button.addEventListener('click', () => checkAnswer(opt, currentCorrectAnswer, feedback));
+                    answerOptions.appendChild(button);
+                });
+                speak("Ayo hitung ada berapa jumlah benda berikut!");
+            }
+            document.getElementById('g5-next-btn').addEventListener('click', initGame5);
+            
+            // --- Logika Game 6: Mengisi Ten Frame ---
+            function initGame6() {
+                const targetNumberEl = document.getElementById('g6-target-number');
+                const frame = document.getElementById('g6-ten-frame');
+                const feedback = document.getElementById('g6-feedback');
+                const checkBtn = document.getElementById('g6-check-btn');
+                const nextBtn = document.getElementById('g6-next-btn');
+
+                feedback.textContent = '';
+                frame.innerHTML = '';
+                checkBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'none';
+
+                const targetNumber = getRandomInt(1, 10);
+                currentCorrectAnswer = targetNumber;
+                targetNumberEl.textContent = targetNumber;
+
+                for (let i = 0; i < 10; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'frame-cell';
+                    cell.addEventListener('click', () => cell.classList.toggle('filled'));
+                    frame.appendChild(cell);
+                }
+                speak(`Isi kotak di bawah ini sampai berjumlah ${targetNumber}`);
+            }
+            document.getElementById('g6-check-btn').addEventListener('click', () => {
+                const filledCount = document.querySelectorAll('#g6-ten-frame .filled').length;
+                const feedback = document.getElementById('g6-feedback');
+                checkAnswer(filledCount, currentCorrectAnswer, feedback);
+                if(filledCount === currentCorrectAnswer){
+                   document.getElementById('g6-check-btn').style.display = 'none';
+                   document.getElementById('g6-next-btn').style.display = 'inline-block';
+                }
+            });
+            document.getElementById('g6-next-btn').addEventListener('click', initGame6);
+
+            // --- Logika Game 7: Konsep Nol ---
+            function initGame7() {
+                const gameArea = document.getElementById('g7-game-area');
+                const birdCountSpan = document.getElementById('g7-bird-count');
+                const flyBtn = document.getElementById('g7-fly-btn');
+                const questionDiv = document.getElementById('g7-question');
+                const answerOptions = document.getElementById('g7-answer-options');
+                const feedback = document.getElementById('g7-feedback');
+                const resetBtn = document.getElementById('g7-reset-btn');
+
+                gameArea.innerHTML = '';
+                feedback.textContent = '';
+                questionDiv.style.display = 'none';
+                flyBtn.style.display = 'inline-block';
+                resetBtn.style.display = 'none';
+                flyBtn.disabled = false;
+                
+                const initialBirds = getRandomInt(2, 4);
+                birdCountSpan.textContent = initialBirds;
+                
+                for(let i=0; i<initialBirds; i++){
+                    const bird = document.createElement('span');
+                    bird.className = 'bird';
+                    bird.textContent = '🐦';
+                    gameArea.appendChild(bird);
+                }
+                speak(`Ada ${initialBirds} burung di pagar. Klik tombol untuk membuatnya terbang!`);
+
+                flyBtn.onclick = () => {
+                    const birds = gameArea.querySelectorAll('.bird:not(.fly-away)');
+                    if (birds.length > 0) {
+                        birds[birds.length - 1].classList.add('fly-away');
+                        birdCountSpan.textContent = birds.length - 1;
+                        if (birds.length - 1 === 0) {
+                            flyBtn.disabled = true;
+                            setTimeout(() => {
+                                questionDiv.style.display = 'block';
+                                speak("Sekarang, ada berapa burung di pagar?");
+                            }, 500);
+                        }
+                    }
+                };
+
+                answerOptions.innerHTML = '';
+                currentCorrectAnswer = 0;
+                let options = [0, 1, 2];
+                shuffleArray(options).forEach(opt => {
+                    const button = document.createElement('button');
+                    button.textContent = opt;
+                    button.className = 'answer-btn';
+                    button.addEventListener('click', () => {
+                       checkAnswer(opt, currentCorrectAnswer, feedback)
+                       if (opt === 0) resetBtn.style.display = 'inline-block';
+                    });
+                    answerOptions.appendChild(button);
+                });
+            }
+            document.getElementById('g7-reset-btn').addEventListener('click', initGame7);
+            
+            // --- Logika Game 8: Grafik Gambar ---
+            function initGame8() {
+                const graphContainer = document.getElementById('g8-graph-container');
+                const question = document.getElementById('g8-question');
+                const answerOptions = document.getElementById('g8-answer-options');
+                const feedback = document.getElementById('g8-feedback');
+                
+                graphContainer.innerHTML = '';
+                answerOptions.innerHTML = '';
+                feedback.textContent = '';
+
+                const fruits = [
+                    { name: 'Apel', emoji: '🍎', count: getRandomInt(1, 5) },
+                    { name: 'Jeruk', emoji: '🍊', count: getRandomInt(1, 5) },
+                    { name: 'Pisang', emoji: '🍌', count: getRandomInt(1, 5) }
+                ];
+
+                fruits.forEach(fruit => {
+                    const bar = document.createElement('div');
+                    bar.className = 'graph-bar';
+                    let itemsHTML = '';
+                    for (let i = 0; i < fruit.count; i++) {
+                        itemsHTML += `<div class="item">${fruit.emoji}</div>`;
+                    }
+                    bar.innerHTML = itemsHTML + `<div class="label">${fruit.name}</div>`;
+                    graphContainer.appendChild(bar);
+                });
+
+                const askedFruit = fruits[getRandomInt(0, fruits.length - 1)];
+                question.textContent = `Ada berapa buah ${askedFruit.name}?`;
+                currentCorrectAnswer = askedFruit.count;
+
+                let options = [currentCorrectAnswer];
+                while(options.length < 3){
+                    let r = getRandomInt(1, 5);
+                    if(!options.includes(r)) options.push(r);
+                }
+
+                shuffleArray(options).forEach(opt => {
+                    const button = document.createElement('button');
+                    button.textContent = opt;
+                    button.className = 'answer-btn';
+                    button.addEventListener('click', () => checkAnswer(opt, currentCorrectAnswer, feedback));
+                    answerOptions.appendChild(button);
+                });
+                speak(`Perhatikan grafik buah di bawah ini. ${question.textContent}`);
+            }
+            document.getElementById('g8-next-btn').addEventListener('click', initGame8);
+
+            // --- Logika Game 9: Menghitung Jari ---
+            function initGame9() {
+                const gameArea = document.getElementById('g9-game-area');
+                const answerOptions = document.getElementById('g9-answer-options');
+                const feedback = document.getElementById('g9-feedback');
+                // Using number emojis as a simple representation of fingers
+                // A more complex implementation could use SVGs of hands.
+                const hands = ['✋','✊','☝️','✌️','🤟','🖖','🖐️'];
+                const fingerCounts = { '✊':0, '☝️':1, '✌️':2, '🤟':3, '🖖':4, '🖐️':5, '✋':5 };
+
+                feedback.textContent = '';
+                gameArea.innerHTML = '';
+                answerOptions.innerHTML = '';
+                
+                let validHands = Object.keys(fingerCounts).filter(h => fingerCounts[h] <= 5);
+                const hand = validHands[getRandomInt(0, validHands.length-1)];
+                const correctCount = fingerCounts[hand];
+                currentCorrectAnswer = correctCount;
+
+                gameArea.textContent = hand;
+
+                let options = [correctCount];
+                while (options.length < 3) {
+                    let randomOption = getRandomInt(0, 5);
+                    if (!options.includes(randomOption)) {
+                        options.push(randomOption);
+                    }
+                }
+                
+                shuffleArray(options).forEach(opt => {
+                    const button = document.createElement('button');
+                    button.textContent = opt;
+                    button.className = 'answer-btn';
+                    button.addEventListener('click', () => checkAnswer(opt, currentCorrectAnswer, feedback));
+                    answerOptions.appendChild(button);
+                });
+                speak("Berapa jumlah jari yang ditunjukkan?");
+            }
+            document.getElementById('g9-next-btn').addEventListener('click', initGame9);
+
+             // --- Logika Game 10: Mana Jumlah yang Berbeda? ---
+            function initGame10() {
+                const gameArea = document.getElementById('g10-game-area');
+                const feedback = document.getElementById('g10-feedback');
+                const items = ['♦️', '♣️', '♥️', '♠️'];
+                
+                gameArea.innerHTML = '';
+                feedback.textContent = '';
+
+                const commonCount = getRandomInt(2, 5);
+                let differentCount;
+                do {
+                    differentCount = getRandomInt(1, 5);
+                } while (differentCount === commonCount);
+                currentCorrectAnswer = differentCount;
+
+                let counts = [commonCount, commonCount, commonCount, differentCount];
+                shuffleArray(counts);
+
+                counts.forEach(count => {
+                    const group = document.createElement('div');
+                    group.className = 'answer-btn'; // Re-use styling
+                    group.style.width = 'auto';
+                    group.style.height = 'auto';
+                    group.style.minHeight = '70px';
+                    group.style.padding = '15px';
+                    group.style.borderRadius = '20px';
+                    group.style.flexDirection = 'row';
+                    group.style.flexWrap = 'wrap';
+
+                    const itemType = items[getRandomInt(0, items.length - 1)];
+                    group.textContent = itemType.repeat(count);
+                    group.addEventListener('click', () => checkAnswer(count, currentCorrectAnswer, feedback));
+                    gameArea.appendChild(group);
+                });
+                speak("Klik kelompok benda yang jumlahnya berbeda dari yang lain!");
+            }
+            document.getElementById('g10-next-btn').addEventListener('click', initGame10);
+
+            // --- Fungsi Pengecekan Jawaban Umum ---
+            function checkAnswer(selected, correct, feedbackElement) {
+                if (selected === correct) {
+                    feedbackElement.textContent = 'Hebat, jawabanmu benar! 🎉';
+                    feedbackElement.className = 'feedback correct';
+                    speak('Hebat, benar!');
+                } else {
+                    feedbackElement.textContent = 'Oops, coba lagi ya! 🤔';
+                    feedbackElement.className = 'feedback incorrect';
+                    speak('Oops, coba lagi');
+                }
+            }
+
+            // --- Inisialisasi Awal ---
+            showGame(1);
+        });
+    </script>
 </body>
 </html>
 
