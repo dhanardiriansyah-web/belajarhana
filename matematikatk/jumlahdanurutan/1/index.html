@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Matematika Interaktif - Anak TK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-text: #333333;
+            --secondary-text: #555555;
+            --border-color: #dddddd;
+            --correct-bg: #d4edda;
+            --correct-border: #c3e6cb;
+            --incorrect-bg: #f8d7da;
+            --incorrect-border: #f5c6cb;
+            --button-bg: #dc3545; /* Red for Check button */
+            --try-again-bg: #007bff;  
+            --try-again-hover-bg: #0056b3;
+            --speak-btn-bg: #ffc107;
+            --topic-header-bg: #6c757d;
+        }
+        
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: var(--primary-text);
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .book-container {
+            width: 100%;
+        }
+
+        .page, .topic-header {
+            background: white;
+            width: 176mm; /* B5 Paper Width */
+            padding: 20mm;
+            margin: 1.5cm auto;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+        }
+        
+        .page {
+             min-height: 250mm; /* B5 Paper Height */
+        }
+        
+        .topic-header {
+            background-color: var(--topic-header-bg);
+            color: white;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 24pt;
+            font-weight: 900;
+        }
+
+
+        /* --- COVER PAGE STYLING --- */
+        .cover-page {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 250mm;
+            background-color: #ffffff;
+        }
+        
+        .cover-logo {
+            width: 90mm;
+            margin-bottom: 20mm;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cover-page .title {
+            font-size: 32pt;
+            font-weight: 900;
+            margin: 0;
+            color: var(--primary-text);
+            line-height: 1.2;
+        }
+
+        .cover-page .subtitle {
+            font-size: 18pt;
+            margin-top: 15px;
+            color: var(--secondary-text);
+            font-weight: 700;
+        }
+        
+        /* --- PRINT SETTINGS --- */
+        @page {
+            size: B5;
+            margin: 0;
+        }
+
+        @media print {
+            body {
+                background: none;
+            }
+            .page, .topic-header {
+                width: 100%;
+                min-height: 0;
+                margin: 0;
+                padding: 20mm;
+                box-shadow: none;
+                break-after: page;
+                border-radius: 0;
+            }
+             .answer-wrapper, .page-footer-container, .solution-text-container, .header-bottom, .speak-btn, .choice-wrapper {
+                display: none !important;
+            }
+        }
+        
+        /* --- CONTENT STYLING --- */
+        .page-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .header-bottom {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            align-items: center;
+        }
+
+        .header-bottom span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .info-input {
+            border: none;
+            border-bottom: 1px dotted var(--secondary-text);
+            font-family: inherit;
+            font-size: 11pt;
+            font-weight: 700;
+            padding: 2px;
+            width: 220px;
+        }
+
+        .info-input:focus {
+            outline: none;
+            border-bottom: 1px solid var(--primary-text);
+        }
+        
+        .page-header img {
+            height: 35px;
+        }
+        
+        .score-display {
+            font-weight: 900;
+            font-size: 16pt;
+            background-color: #f8f9fa;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        
+        .page-content::before { /* Watermark */
+            content: '';
+            background-image: url('https://imgix3.ruangguru.com/assets/miscellaneous/png_tiy3nf_6017.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 12cm;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            opacity: 0.05;
+            z-index: 0;
+            filter: grayscale(100%);
+        }
+        
+        .cover-page::before {
+            content: none;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        
+        h2 {
+            font-size: 20pt;
+            font-weight: 900;
+            color: #000;
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .soal-container {
+            flex-grow: 1;
+        }
+
+        .soal-item-wrapper {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .soal-item-wrapper:last-child {
+            border-bottom: none;
+        }
+        
+        /* Styles for choice buttons */
+        .choice-wrapper {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .choice-btn {
+            flex: 1;
+            padding: 15px;
+            font-size: 24pt;
+            font-weight: 700;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+        }
+        .choice-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            border-color: var(--primary-text);
+        }
+        .choice-btn.correct {
+            background-color: var(--correct-bg);
+            border-color: var(--correct-border);
+            color: #155724;
+            transform: scale(1.05);
+        }
+        .choice-btn.incorrect {
+            background-color: var(--incorrect-bg);
+            border-color: var(--incorrect-border);
+            color: #721c24;
+            animation: shake 0.5s;
+        }
+        .choice-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+        
+        .page-footer-container {
+            text-align: center;
+            margin-top: 20px;
+            min-height: 60px; /* Reserve space */
+        }
+        
+        .feedback-message {
+            margin-bottom: 15px;
+            font-style: italic;
+            color: var(--secondary-text);
+            font-weight: 700;
+            font-size: 14pt;
+        }
+        
+        .footer-btn {
+             padding: 12px 30px;
+             font-size: 14pt;
+             font-weight: 700;
+             cursor: pointer;
+             border-radius: 8px;
+             color: white;
+             border: none;
+             transition: transform 0.2s;
+        }
+        .footer-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .check-all-btn {
+            background-color: var(--button-bg);
+        }
+
+        .try-again-btn {
+             background-color: var(--try-again-bg);
+        }
+        .try-again-btn:hover {
+             background-color: var(--try-again-hover-bg);
+        }
+
+        .soal-grid {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            font-size: 16pt; /* Bigger font for kids */
+        }
+        
+        .soal-nomor {
+            font-weight: 900;
+        }
+        
+        .soal-konten p {
+            margin: 0;
+            font-weight: 700;
+        }
+        
+        .speak-btn {
+            background-color: var(--speak-btn-bg);
+            border: none;
+            color: var(--primary-text);
+            padding: 8px 12px;
+            font-size: 16pt;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .speak-btn:hover {
+            background-color: #ffca2c;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="book-container">
+
+    <!-- Cover Page -->
+    <section class="page cover-page">
+        <div class="content-wrapper">
+            <img src="https://imgix3.ruangguru.com/assets/miscellaneous/png_tiy3nf_6017.png" alt="Logo" class="cover-logo">
+            <h1 class="title">Buku Latihan Matematika</h1>
+            <p class="subtitle">Untuk Taman Kanak-Kanak</p>
+        </div>
+    </section>
+
+    <!-- Worksheets will be injected here by JavaScript -->
+    <div id="worksheet-container"></div>
+
+</div>
+
+<script>
+// --- START OF JAVASCRIPT LOGIC ---
+const topics = [
+    {
+        topicTitle: "Bagian 1: Mengurutkan Angka",
+        worksheets: [
+            { title: "Latihan 1.1: Menghitung 1-3", questions: [
+                { type: 'choice', q: "Hitung ada berapa 🍎?", text: "Hitung ada berapa apel?", options: ["1", "2", "3"], answer: "1" },
+                { type: 'choice', q: "Hitung ada berapa 🚗🚗?", text: "Hitung ada berapa mobil?", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Hitung ada berapa ☀️☀️☀️?", text: "Hitung ada berapa matahari?", options: ["1", "2", "3"], answer: "3" },
+                { type: 'choice', q: "Mana angka dua?", text: "Mana angka dua?", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Ada berapa 🐱?", text: "Ada berapa kucing?", options: ["1", "2", "3"], answer: "1" },
+                { type: 'choice', q: "Ada berapa 🏠🏠?", text: "Ada berapa rumah?", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Angka mana yang tiga?", text: "Angka mana yang tiga?", options: ["1", "2", "3"], answer: "3" },
+                { type: 'choice', q: "Hitung jarimu: ☝️", text: "Hitung jarimu: satu", options: ["1", "2", "3"], answer: "1" },
+                { type: 'choice', q: "Hitung jarimu: ☝️☝️", text: "Hitung jarimu: dua", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Hitung jarimu: ☝️☝️☝️", text: "Hitung jarimu: tiga", options: ["1", "2", "3"], answer: "3" },
+            ]},
+            { title: "Latihan 1.2: Menghitung 1-5", questions: [
+                { type: 'choice', q: "Ada berapa 🌳🌳🌳🌳?", text: "Ada berapa pohon?", options: ["3", "4", "5"], answer: "4" },
+                { type: 'choice', q: "Ada berapa ⭐️⭐️⭐️⭐️⭐️?", text: "Ada berapa bintang?", options: ["3", "4", "5"], answer: "5" },
+                { type: 'choice', q: "Setelah angka 3, angka berapa?", text: "Setelah angka tiga, angka berapa?", options: ["2", "4", "5"], answer: "4" },
+                { type: 'choice', q: "Sebelum angka 5, angka berapa?", text: "Sebelum angka lima, angka berapa?", options: ["3", "4", "6"], answer: "4" },
+                { type: 'choice', q: "Hitung 🎈🎈🎈🎈", text: "Hitung balon", options: ["3", "4", "5"], answer: "4" },
+                { type: 'choice', q: "Hitung 🐟🐟🐟🐟🐟", text: "Hitung ikan", options: ["3", "4", "5"], answer: "5" },
+                { type: 'choice', q: "Angka mana yang empat?", text: "Angka mana yang empat?", options: ["3", "4", "5"], answer: "4" },
+                { type: 'choice', q: "Angka mana yang lima?", text: "Angka mana yang lima?", options: ["3", "4", "5"], answer: "5" },
+                { type: 'choice', q: "Urutkan: 1, 2, 3, 4, __", text: "Urutkan: satu, dua, tiga, empat, ...", options: ["3", "5", "6"], answer: "5" },
+                { type: 'choice', q: "Hitung semua jari di satu tangan!", text: "Hitung semua jari di satu tangan!", options: ["4", "5", "6"], answer: "5" },
+            ]},
+             { title: "Latihan 1.3: Menghitung 6-10", questions: [
+                { type: 'choice', q: "Hitung 🍪🍪🍪🍪🍪🍪", text: "Hitung kue", options: ["5", "6", "7"], answer: "6" },
+                { type: 'choice', q: "Hitung ✏️✏️✏️✏️✏️✏️✏️", text: "Hitung pensil", options: ["6", "7", "8"], answer: "7" },
+                { type: 'choice', q: "Setelah 6, angka berapa?", text: "Setelah enam, angka berapa?", options: ["5", "7", "8"], answer: "7" },
+                { type: 'choice', q: "Ada berapa 🦋🦋🦋🦋🦋🦋🦋🦋?", text: "Ada berapa kupu-kupu?", options: ["7", "8", "9"], answer: "8" },
+                { type: 'choice', q: "Ada berapa ⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️⚽️?", text: "Ada berapa bola?", options: ["8", "9", "10"], answer: "9" },
+                { type: 'choice', q: "Hitung semua 🔟 jari tanganmu!", text: "Hitung semua sepuluh jari tanganmu!", options: ["8", "9", "10"], answer: "10" },
+                { type: 'choice', q: "Sebelum 8, angka berapa?", text: "Sebelum delapan, angka berapa?", options: ["6", "7", "9"], answer: "7" },
+                { type: 'choice', q: "Angka antara 8 dan 10?", text: "Angka antara delapan dan sepuluh?", options: ["7", "9", "11"], answer: "9" },
+                { type: 'choice', q: "Angka mana yang enam?", text: "Angka mana yang enam?", options: ["6", "7", "8"], answer: "6" },
+                { type: 'choice', q: "Angka mana yang sepuluh?", text: "Angka mana yang sepuluh?", options: ["8", "9", "10"], answer: "10" }
+            ]},
+            { title: "Latihan 1.4: Mengisi Angka Hilang", questions: [
+                { type: 'choice', q: "Isi: 1, 2, __, 4", text: "Isi: satu, dua, ..., empat", options: ["2", "3", "5"], answer: "3" },
+                { type: 'choice', q: "Isi: 5, 6, 7, __, 9", text: "Isi: lima, enam, tujuh, ..., sembilan", options: ["6", "8", "10"], answer: "8" },
+                { type: 'choice', q: "Isi: __, 9, 10", text: "Isi: ..., sembilan, sepuluh", options: ["7", "8", "11"], answer: "8" },
+                { type: 'choice', q: "Isi: 3, __, 5", text: "Isi: tiga, ..., lima", options: ["2", "4", "6"], answer: "4" },
+                { type: 'choice', q: "Isi: 7, 8, __", text: "Isi: tujuh, delapan, ...", options: ["6", "9", "10"], answer: "9" },
+                { type: 'choice', q: "Hitung mundur: 3, 2, __", text: "Hitung mundur: tiga, dua, ...", options: ["1", "0", "4"], answer: "1" },
+                { type: 'choice', q: "Hitung mundur: 5, __, 3", text: "Hitung mundur: lima, ..., tiga", options: ["6", "4", "2"], answer: "4" },
+                { type: 'choice', q: "Hitung mundur: __, 9, 8, 7", text: "Hitung mundur: ..., sembilan, delapan, tujuh", options: ["11", "10", "6"], answer: "10" },
+                { type: 'choice', q: "Isi: 4, 5, __, 7", text: "Isi: empat, lima, ..., tujuh", options: ["3", "6", "8"], answer: "6" },
+                { type: 'choice', q: "Isi: __, 2, 3", text: "Isi: ..., dua, tiga", options: ["0", "1", "4"], answer: "1" }
+            ]},
+            { title: "Latihan 1.5: Mana Lebih Banyak?", questions: [
+                { type: 'choice', q: "Mana lebih banyak?", text: "Mana yang lebih banyak?", options: ["🍎🍎", "🍎"], answer: "🍎🍎" },
+                { type: 'choice', q: "Mana lebih banyak?", text: "Mana yang lebih banyak?", options: ["🚗🚗🚗", "🚗🚗🚗🚗"], answer: "🚗🚗🚗🚗" },
+                { type: 'choice', q: "Mana lebih banyak?", text: "Mana yang lebih banyak? Lima atau Tiga?", options: ["5", "3"], answer: "5" },
+                { type: 'choice', q: "Mana lebih banyak?", text: "Mana yang lebih banyak?", options: ["⭐️⭐️", "⭐️⭐️⭐️⭐️⭐️"], answer: "⭐️⭐️⭐️⭐️⭐️" },
+                { type: 'choice', q: "Mana lebih banyak?", text: "Mana yang lebih banyak? Delapan atau Sembilan?", options: ["8", "9"], answer: "9" },
+                { type: 'choice', q: "Mana lebih banyak?", text: "Mana yang lebih banyak?", options: ["🌳🌳🌳🌳🌳🌳", "🌳🌳🌳"], answer: "🌳🌳🌳🌳🌳🌳" },
+                { type: 'choice', q: "Mana lebih banyak?", text: "Mana yang lebih banyak? Satu atau Sepuluh?", options: ["1", "10"], answer: "10" },
+                { type: 'choice', q: "Mana lebih banyak?", text: "Mana yang lebih banyak?", options: ["🐱🐱🐱🐱", "🐱🐱"], answer: "🐱🐱🐱🐱" },
+                { type: 'choice', q: "Mana lebih banyak?", text: "Mana yang lebih banyak? Tujuh atau Enam?", options: ["7", "6"], answer: "7" },
+                { type: 'choice', q: "Mana lebih banyak?", text: "Mana yang lebih banyak?", options: ["☀️", "☀️☀️☀️"], answer: "☀️☀️☀️" }
+            ]},
+             { title: "Latihan 1.6: Mana Lebih Sedikit?", questions: [
+                { type: 'choice', q: "Mana lebih sedikit?", text: "Mana yang lebih sedikit?", options: ["🍎🍎", "🍎"], answer: "🍎" },
+                { type: 'choice', q: "Mana lebih sedikit?", text: "Mana yang lebih sedikit?", options: ["🚗🚗🚗", "🚗🚗🚗🚗"], answer: "🚗🚗🚗" },
+                { type: 'choice', q: "Mana lebih sedikit?", text: "Mana yang lebih sedikit? Lima atau Tiga?", options: ["5", "3"], answer: "3" },
+                { type: 'choice', q: "Mana lebih sedikit?", text: "Mana yang lebih sedikit?", options: ["⭐️⭐️", "⭐️⭐️⭐️⭐️⭐️"], answer: "⭐️⭐️" },
+                { type: 'choice', q: "Mana lebih sedikit?", text: "Mana yang lebih sedikit? Delapan atau Sembilan?", options: ["8", "9"], answer: "8" },
+                { type: 'choice', q: "Mana lebih sedikit?", text: "Mana yang lebih sedikit?", options: ["🌳🌳🌳🌳🌳🌳", "🌳🌳🌳"], answer: "🌳🌳🌳" },
+                { type: 'choice', q: "Mana lebih sedikit?", text: "Mana yang lebih sedikit? Satu atau Sepuluh?", options: ["1", "10"], answer: "1" },
+                { type: 'choice', q: "Mana lebih sedikit?", text: "Mana yang lebih sedikit?", options: ["🐱🐱🐱🐱", "🐱🐱"], answer: "🐱🐱" },
+                { type: 'choice', q: "Mana lebih sedikit?", text: "Mana yang lebih sedikit? Tujuh atau Enam?", options: ["7", "6"], answer: "6" },
+                { type: 'choice', q: "Mana lebih sedikit?", text: "Mana yang lebih sedikit?", options: ["☀️", "☀️☀️☀️"], answer: "☀️" }
+            ]},
+            { title: "Latihan 1.7: Mengurutkan Angka", questions: [
+                { type: 'choice', q: "Urutkan dari terkecil: 2, 1, 3", text: "Urutkan dari yang paling kecil: dua, satu, tiga", options: ["1, 2, 3", "3, 2, 1", "2, 1, 3"], answer: "1, 2, 3" },
+                { type: 'choice', q: "Urutkan dari terkecil: 5, 3, 4", text: "Urutkan dari yang paling kecil: lima, tiga, empat", options: ["5, 3, 4", "3, 4, 5", "4, 3, 5"], answer: "3, 4, 5" },
+                { type: 'choice', q: "Urutkan dari terbesar: 1, 3, 2", text: "Urutkan dari yang paling besar: satu, tiga, dua", options: ["1, 2, 3", "3, 2, 1", "2, 3, 1"], answer: "3, 2, 1" },
+                { type: 'choice', q: "Urutkan dari terbesar: 6, 8, 7", text: "Urutkan dari yang paling besar: enam, delapan, tujuh", options: ["8, 7, 6", "6, 7, 8", "7, 8, 6"], answer: "8, 7, 6" },
+                { type: 'choice', q: "Mana angka paling kecil?", text: "Mana angka paling kecil?", options: ["4", "1", "5"], answer: "1" },
+                { type: 'choice', q: "Mana angka paling besar?", text: "Mana angka paling besar?", options: ["8", "9", "7"], answer: "9" },
+                { type: 'choice', q: "Urutkan dari terkecil: 10, 8, 9", text: "Urutkan dari terkecil: sepuluh, delapan, sembilan", options: ["10, 9, 8", "8, 9, 10", "9, 8, 10"], answer: "8, 9, 10" },
+                { type: 'choice', q: "Urutkan dari terbesar: 5, 2, 4", text: "Urutkan dari terbesar: lima, dua, empat", options: ["2, 4, 5", "4, 5, 2", "5, 4, 2"], answer: "5, 4, 2" },
+                { type: 'choice', q: "Mana angka di tengah? 1, 2, 3", text: "Mana angka di tengah?", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Mana angka di tengah? 7, 8, 9", text: "Mana angka di tengah?", options: ["7", "8", "9"], answer: "8" }
+            ]},
+            { title: "Latihan 1.8: Berhitung Maju", questions: [
+                { type: 'choice', q: "Hitung maju dari 1: 1, 2, __", text: "Hitung maju dari satu: satu, dua, ...", options: ["1", "3", "4"], answer: "3" },
+                { type: 'choice', q: "Hitung maju dari 4: 4, 5, __", text: "Hitung maju dari empat: empat, lima, ...", options: ["3", "6", "7"], answer: "6" },
+                { type: 'choice', q: "Hitung maju dari 8: 8, 9, __", text: "Hitung maju dari delapan: delapan, sembilan, ...", options: ["7", "10", "11"], answer: "10" },
+                { type: 'choice', q: "Satu langkah setelah 5?", text: "Satu langkah setelah lima?", options: ["4", "6", "7"], answer: "6" },
+                { type: 'choice', q: "Dua langkah setelah 2?", text: "Dua langkah setelah dua?", options: ["3", "4", "5"], answer: "4" },
+                { type: 'choice', q: "Satu langkah setelah 9?", text: "Satu langkah setelah sembilan?", options: ["8", "10", "11"], answer: "10" },
+                { type: 'choice', q: "Hitung maju 3 langkah dari 1.", text: "Hitung maju tiga langkah dari satu.", options: ["3", "4", "5"], answer: "4" },
+                { type: 'choice', q: "Hitung maju dari 6: 6, __, 8", text: "Hitung maju dari enam: enam, ..., delapan", options: ["5", "7", "9"], answer: "7" },
+                { type: 'choice', q: "Hitung maju dari 3: 3, 4, 5, __", text: "Hitung maju dari tiga: tiga, empat, lima, ...", options: ["4", "6", "7"], answer: "6" },
+                { type: 'choice', q: "Satu langkah setelah 7?", text: "Satu langkah setelah tujuh?", options: ["6", "8", "9"], answer: "8" }
+            ]},
+            { title: "Latihan 1.9: Berhitung Mundur", questions: [
+                { type: 'choice', q: "Hitung mundur dari 3: 3, 2, __", text: "Hitung mundur dari tiga: tiga, dua, ...", options: ["1", "4", "0"], answer: "1" },
+                { type: 'choice', q: "Hitung mundur dari 5: 5, 4, __", text: "Hitung mundur dari lima: lima, empat, ...", options: ["6", "3", "2"], answer: "3" },
+                { type: 'choice', q: "Hitung mundur dari 10: 10, 9, __", text: "Hitung mundur dari sepuluh: sepuluh, sembilan, ...", options: ["11", "8", "7"], answer: "8" },
+                { type: 'choice', q: "Satu langkah sebelum 4?", text: "Satu langkah sebelum empat?", options: ["5", "3", "2"], answer: "3" },
+                { type: 'choice', q: "Satu langkah sebelum 2?", text: "Satu langkah sebelum dua?", options: ["3", "1", "0"], answer: "1" },
+                { type: 'choice', q: "Dua langkah sebelum 10?", text: "Dua langkah sebelum sepuluh?", options: ["9", "8", "12"], answer: "8" },
+                { type: 'choice', q: "Hitung mundur 3 langkah dari 5.", text: "Hitung mundur tiga langkah dari lima.", options: ["3", "2", "1"], answer: "2" },
+                { type: 'choice', q: "Hitung mundur dari 8: 8, __, 6", text: "Hitung mundur dari delapan: delapan, ..., enam", options: ["9", "7", "5"], answer: "7" },
+                { type: 'choice', q: "Hitung mundur dari 7: 7, 6, 5, __", text: "Hitung mundur dari tujuh: tujuh, enam, lima, ...", options: ["8", "4", "3"], answer: "4" },
+                { type: 'choice', q: "Satu langkah sebelum 9?", text: "Satu langkah sebelum sembilan?", options: ["10", "8", "7"], answer: "8" }
+            ]},
+            { title: "Latihan 1.10: Pengenalan Angka Nol", questions: [
+                { type: 'choice', q: "Ada 🍎, lalu dimakan. Sisanya berapa?", text: "Ada satu apel, lalu dimakan. Sisanya berapa?", options: ["1", "0", "2"], answer: "0" },
+                { type: 'choice', q: "Jika tidak ada kue di piring, ada berapa kue?", text: "Jika tidak ada kue di piring, ada berapa kue?", options: ["1", "0", "10"], answer: "0" },
+                { type: 'choice', q: "Angka mana yang nol?", text: "Angka mana yang nol?", options: ["0", "1", "O"], answer: "0" },
+                { type: 'choice', q: "Angka sebelum 1 adalah __", text: "Angka sebelum satu adalah ...", options: ["2", "0", "-1"], answer: "0" },
+                { type: 'choice', q: "Ada 2 🐦, lalu terbang semua. Sisa berapa?", text: "Ada dua burung, lalu terbang semua. Sisa berapa?", options: ["2", "1", "0"], answer: "0" },
+                { type: 'choice', q: "Mana lebih kecil?", text: "Mana yang lebih kecil?", options: ["1", "0"], answer: "0" },
+                { type: 'choice', q: "Hitung mundur: 2, 1, __", text: "Hitung mundur: dua, satu, ...", options: ["3", "0", "-1"], answer: "0" },
+                { type: 'choice', q: "Ada 3 🍬, lalu dibagikan semua. Sisa?", text: "Ada tiga permen, lalu dibagikan semua. Sisa berapa?", options: ["3", "1", "0"], answer: "0" },
+                { type: 'choice', q: "Berapa jumlah pensil di kotak kosong?", text: "Berapa jumlah pensil di kotak kosong?", options: ["0", "1", "Tidak tahu"], answer: "0" },
+                { type: 'choice', q: "0 + 1 = __", text: "Nol ditambah satu sama dengan ...", options: ["0", "1", "2"], answer: "1" }
+            ]}
+        ]
+    },
+    {
+        topicTitle: "Bagian 2: Mengenal Bentuk",
+        worksheets: [
+             { title: "Latihan 2.1: Mengenal Lingkaran 🔵", questions: [
+                { type: 'choice', q: "Bentuk apa ini? 🔵", text: "Bentuk apa ini?", options: ["Lingkaran", "Persegi"], answer: "Lingkaran" },
+                { type: 'choice', q: "Mana yang lingkaran?", text: "Mana yang lingkaran?", options: ["🔵", "🟥"], answer: "🔵" },
+                { type: 'choice', q: "Roda mobil bentuknya apa?", text: "Roda mobil bentuknya apa?", options: ["Lingkaran", "Segitiga"], answer: "Lingkaran" },
+                { type: 'choice', q: "Jam dinding biasanya bentuknya apa?", text: "Jam dinding biasanya bentuknya apa?", options: ["Lingkaran", "Persegi"], answer: "Lingkaran" },
+                { type: 'choice', q: "Hitung ada berapa 🔵? 🔵🟥🔵", text: "Hitung ada berapa lingkaran?", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Apakah bola itu lingkaran?", text: "Apakah bola itu lingkaran?", options: ["Ya", "Tidak"], answer: "Ya" },
+                { type: 'choice', q: "Bentuk uang koin adalah?", text: "Bentuk uang koin adalah?", options: ["Lingkaran", "Persegi"], answer: "Lingkaran" },
+                { type: 'choice', q: "Mana yang bukan lingkaran?", text: "Mana yang bukan lingkaran?", options: ["Piring", "Buku", "Roda"], answer: "Buku" },
+                { type: 'choice', q: "Ada berapa sudut pada lingkaran?", text: "Ada berapa sudut pada lingkaran?", options: ["0", "1", "4"], answer: "0" },
+                { type: 'choice', q: "Mana benda yang lingkaran?", text: "Mana benda yang lingkaran?", options: ["Bola", "Buku"], answer: "Bola" }
+            ]},
+            { title: "Latihan 2.2: Mengenal Persegi 🟥", questions: [
+                { type: 'choice', q: "Bentuk apa ini? 🟥", text: "Bentuk apa ini?", options: ["Persegi", "Lingkaran"], answer: "Persegi" },
+                { type: 'choice', q: "Mana yang persegi?", text: "Mana yang persegi?", options: ["🟥", "🔺"], answer: "🟥" },
+                { type: 'choice', q: "Jendela kelas bentuknya apa?", text: "Jendela kelas bentuknya apa?", options: ["Persegi", "Lingkaran"], answer: "Persegi" },
+                { type: 'choice', q: "Buku gambar bentuknya apa?", text: "Buku gambar bentuknya apa?", options: ["Persegi", "Segitiga"], answer: "Persegi" },
+                { type: 'choice', q: "Hitung ada berapa 🟥? 🟥🔵🟥🔺", text: "Hitung ada berapa persegi?", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Apakah meja bentuknya persegi?", text: "Apakah meja bentuknya persegi?", options: ["Ya", "Tidak"], answer: "Ya" },
+                { type: 'choice', q: "Ubin lantai bentuknya apa?", text: "Ubin lantai bentuknya apa?", options: ["Persegi", "Lingkaran"], answer: "Persegi" },
+                { type: 'choice', q: "Mana yang bukan persegi?", text: "Mana yang bukan persegi?", options: ["Papan catur", "Roda"], answer: "Roda" },
+                { type: 'choice', q: "Ada berapa sisi pada persegi?", text: "Ada berapa sisi pada persegi?", options: ["3", "4", "5"], answer: "4" },
+                { type: 'choice', q: "Mana benda yang persegi?", text: "Mana benda yang persegi?", options: ["Jendela", "Bola"], answer: "Jendela" }
+            ]},
+             { title: "Latihan 2.3: Mengenal Segitiga 🔺", questions: [
+                { type: 'choice', q: "Bentuk apa ini? 🔺", text: "Bentuk apa ini?", options: ["Segitiga", "Persegi"], answer: "Segitiga" },
+                { type: 'choice', q: "Mana yang segitiga?", text: "Mana yang segitiga?", options: ["🔺", "🔵"], answer: "🔺" },
+                { type: 'choice', q: "Atap rumah bentuknya apa?", text: "Atap rumah bentuknya apa?", options: ["Segitiga", "Lingkaran"], answer: "Segitiga" },
+                { type: 'choice', q: "Potongan pizza bentuknya apa?", text: "Potongan pizza bentuknya apa?", options: ["Segitiga", "Persegi"], answer: "Segitiga" },
+                { type: 'choice', q: "Hitung ada berapa 🔺? 🔺🟥🔺🔵", text: "Hitung ada berapa segitiga?", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Apakah gunung bentuknya seperti segitiga?", text: "Apakah gunung bentuknya seperti segitiga?", options: ["Ya", "Tidak"], answer: "Ya" },
+                { type: 'choice', q: "Gantungan baju (hanger) bentuknya apa?", text: "Gantungan baju bentuknya apa?", options: ["Segitiga", "Lingkaran"], answer: "Segitiga" },
+                { type: 'choice', q: "Mana yang bukan segitiga?", text: "Mana yang bukan segitiga?", options: ["Atap", "Bola"], answer: "Bola" },
+                { type: 'choice', q: "Ada berapa sudut pada segitiga?", text: "Ada berapa sudut pada segitiga?", options: ["2", "3", "4"], answer: "3" },
+                { type: 'choice', q: "Mana benda yang segitiga?", text: "Mana benda yang segitiga?", options: ["Atap Rumah", "Piring"], answer: "Atap Rumah" }
+            ]},
+            { title: "Latihan 2.4: Membedakan Bentuk", questions: [
+                { type: 'choice', q: "Ada berapa 🔵? 🔵🟥🔺🔵", text: "Ada berapa lingkaran?", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Ada berapa 🟥? 🔵🟥🔺🔵", text: "Ada berapa persegi?", options: ["1", "2", "3"], answer: "1" },
+                { type: 'choice', q: "Ada berapa 🔺? 🔵🟥🔺🔵", text: "Ada berapa segitiga?", options: ["1", "2", "3"], answer: "1" },
+                { type: 'choice', q: "Bentuk apa yang paling banyak?", text: "Bentuk apa yang paling banyak?", options: ["🔵", "🟥"], answer: "🔵" },
+                { type: 'choice', q: "Bentuk apa yang paling sedikit?", text: "Bentuk apa yang paling sedikit?", options: ["🔵", "🟥", "🔺"], answer: "🟥" },
+                { type: 'choice', q: "Ada berapa total bentuk? 🟥🔺🔵", text: "Ada berapa total bentuk?", options: ["2", "3", "4"], answer: "3" },
+                { type: 'choice', q: "Sebutkan nama bentuk ini: 🟥", text: "Sebutkan nama bentuk ini", options: ["Persegi", "Lingkaran"], answer: "Persegi" },
+                { type: 'choice', q: "Sebutkan nama bentuk ini: 🔵", text: "Sebutkan nama bentuk ini", options: ["Persegi", "Lingkaran"], answer: "Lingkaran" },
+                { type: 'choice', q: "Sebutkan nama bentuk ini: 🔺", text: "Sebutkan nama bentuk ini", options: ["Segitiga", "Lingkaran"], answer: "Segitiga" },
+                { type: 'choice', q: "Mana yang punya 3 sisi?", text: "Mana yang punya tiga sisi?", options: ["🟥", "🔺"], answer: "🔺" }
+            ]},
+            { title: "Latihan 2.5: Bentuk di Sekitar Kita", questions: [
+                { type: 'choice', q: "Tombol baju bentuknya?", text: "Tombol baju bentuknya apa?", options: ["Lingkaran", "Persegi"], answer: "Lingkaran" },
+                { type: 'choice', q: "Layar TV bentuknya?", text: "Layar televisi bentuknya apa?", options: ["Persegi", "Segitiga"], answer: "Persegi" },
+                { type: 'choice', q: "Penggaris segitiga bentuknya?", text: "Penggaris segitiga bentuknya apa?", options: ["Segitiga", "Lingkaran"], answer: "Segitiga" },
+                { type: 'choice', q: "Donat bentuknya?", text: "Donat bentuknya apa?", options: ["Lingkaran", "Persegi"], answer: "Lingkaran" },
+                { type: 'choice', q: "Bingkai foto bentuknya?", text: "Bingkai foto bentuknya apa?", options: ["Persegi", "Lingkaran"], answer: "Persegi" },
+                { type: 'choice', q: "Layang-layang bentuknya?", text: "Layang-layang bentuknya apa?", options: ["Belah Ketupat", "Lingkaran"], answer: "Belah Ketupat" },
+                { type: 'choice', q: "Sarung bantal bentuknya?", text: "Sarung bantal bentuknya apa?", options: ["Persegi", "Segitiga"], answer: "Persegi" },
+                { type: 'choice', q: "Piring bentuknya?", text: "Piring bentuknya apa?", options: ["Lingkaran", "Persegi"], answer: "Lingkaran" },
+                { type: 'choice', q: "Puncak tumpeng bentuknya?", text: "Puncak tumpeng bentuknya apa?", options: ["Segitiga", "Lingkaran"], answer: "Segitiga" },
+                { type: 'choice', q: "Tanda 'STOP' bentuknya apa?", text: "Tanda 'STOP' bentuknya apa?", options: ["Segi Delapan", "Lingkaran"], answer: "Segi Delapan" },
+            ]},
+             { title: "Latihan 2.6: Mencari Bentuk", questions: [
+                { type: 'choice', q: "Cari 🔵 di gambar ini: 🚗", text: "Cari lingkaran di gambar mobil", options: ["Roda", "Jendela"], answer: "Roda" },
+                { type: 'choice', q: "Cari 🟥 di gambar ini: 🏠", text: "Cari persegi di gambar rumah", options: ["Pintu", "Atap"], answer: "Pintu" },
+                { type: 'choice', q: "Cari 🔺 di gambar ini: 🏠", text: "Cari segitiga di gambar rumah", options: ["Dinding", "Atap"], answer: "Atap" },
+                { type: 'choice', q: "Bentuk apa yang ada di 🍕?", text: "Bentuk apa yang ada di pizza?", options: ["Segitiga", "Persegi"], answer: "Segitiga" },
+                { type: 'choice', q: "Bentuk apa yang ada di 🍪?", text: "Bentuk apa yang ada di kue?", options: ["Lingkaran", "Segitiga"], answer: "Lingkaran" },
+                { type: 'choice', q: "Cari bentuk di 🍉", text: "Cari bentuk di semangka", options: ["Lingkaran", "Persegi"], answer: "Lingkaran" },
+                { type: 'choice', q: "Cari bentuk di 🎁", text: "Cari bentuk di kado", options: ["Persegi", "Lingkaran"], answer: "Persegi" },
+                { type: 'choice', q: "Bentuk apa yang ada di ☀️?", text: "Bentuk apa yang ada di matahari?", options: ["Lingkaran", "Segitiga"], answer: "Lingkaran" },
+                { type: 'choice', q: "Cari 🟥 di 🎲", text: "Cari persegi di dadu", options: ["Sisi", "Titik"], answer: "Sisi" },
+                { type: 'choice', q: "Cari 🔺 di ⛵️", text: "Cari segitiga di perahu layar", options: ["Layar", "Badan perahu"], answer: "Layar" }
+            ]},
+            { title: "Latihan 2.7: Mengenal Bintang & Hati", questions: [
+                { type: 'choice', q: "Bentuk apa ini? ⭐", text: "Bentuk apa ini?", options: ["Bintang", "Hati"], answer: "Bintang" },
+                { type: 'choice', q: "Bentuk apa ini? ❤️", text: "Bentuk apa ini?", options: ["Bintang", "Hati"], answer: "Hati" },
+                { type: 'choice', q: "Hitung ada berapa ⭐? ⭐❤️⭐", text: "Hitung ada berapa bintang?", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Hitung ada berapa ❤️? ⭐❤️❤️", text: "Hitung ada berapa hati?", options: ["1", "2", "3"], answer: "2" },
+                { type: 'choice', q: "Bintang di langit bentuknya apa?", text: "Bintang di langit bentuknya apa?", options: ["Bintang", "Lingkaran"], answer: "Bintang" },
+                { type: 'choice', q: "Berapa sudut pada ⭐?", text: "Berapa sudut pada bintang?", options: ["4", "5", "6"], answer: "5" },
+                { type: 'choice', q: "Mana yang bintang?", text: "Mana yang bintang?", options: ["⭐", "🔵"], answer: "⭐" },
+                { type: 'choice', q: "Mana yang hati?", text: "Mana yang hati?", options: ["❤️", "🟥"], answer: "❤️" },
+                { type: 'choice', q: "Benda apa yang berbentuk hati?", text: "Benda apa yang berbentuk hati?", options: ["Balon", "Buku"], answer: "Balon" },
+                { type: 'choice', q: "Benda apa yang berbentuk bintang?", text: "Benda apa yang berbentuk bintang?", options: ["Buah Belimbing", "Apel"], answer: "Buah Belimbing" }
+            ]},
+            { title: "Latihan 2.8: Sisi dan Sudut", questions: [
+                { type: 'choice', q: "Berapa sisi pada 🟥?", text: "Berapa sisi pada persegi?", options: ["3", "4", "0"], answer: "4" },
+                { type: 'choice', q: "Berapa sisi pada 🔺?", text: "Berapa sisi pada segitiga?", options: ["3", "4", "5"], answer: "3" },
+                { type: 'choice', q: "Berapa sisi pada 🔵?", text: "Berapa sisi pada lingkaran?", options: ["0", "1", "2"], answer: "0" },
+                { type: 'choice', q: "Berapa sudut pada 🟥?", text: "Berapa sudut pada persegi?", options: ["3", "4", "0"], answer: "4" },
+                { type: 'choice', q: "Berapa sudut pada 🔺?", text: "Berapa sudut pada segitiga?", options: ["2", "3", "4"], answer: "3" },
+                { type: 'choice', q: "Bentuk apa yang sisinya ada 3?", text: "Bentuk apa yang sisinya ada tiga?", options: ["Segitiga", "Persegi"], answer: "Segitiga" },
+                { type: 'choice', q: "Bentuk apa yang sudutnya ada 4?", text: "Bentuk apa yang sudutnya ada empat?", options: ["Segitiga", "Persegi"], answer: "Persegi" },
+                { type: 'choice', q: "Bentuk apa yang tidak punya sisi lurus?", text: "Bentuk apa yang tidak punya sisi lurus?", options: ["Lingkaran", "Persegi"], answer: "Lingkaran" },
+                { type: 'choice', q: "Jumlah sisi 🟥 + 🔺?", text: "Jumlah sisi persegi ditambah segitiga?", options: ["6", "7", "8"], answer: "7" },
+                { type: 'choice', q: "Jumlah sudut 🟥 + 🔺?", text: "Jumlah sudut persegi ditambah segitiga?", options: ["6", "7", "8"], answer: "7" }
+            ]},
+            { title: "Latihan 2.9: Bentuk 3D Sederhana", questions: [
+                { type: 'choice', q: "Kotak kado bentuknya apa?", text: "Kotak kado bentuknya apa?", options: ["Kubus", "Bola"], answer: "Kubus" },
+                { type: 'choice', q: "Bola sepak bentuknya apa?", text: "Bola sepak bentuknya apa?", options: ["Kubus", "Bola"], answer: "Bola" },
+                { type: 'choice', q: "Topi ulang tahun bentuknya apa?", text: "Topi ulang tahun bentuknya apa?", options: ["Kerucut", "Tabung"], answer: "Kerucut" },
+                { type: 'choice', q: "Kaleng susu bentuknya apa?", text: "Kaleng susu bentuknya apa?", options: ["Kerucut", "Tabung"], answer: "Tabung" },
+                { type: 'choice', q: "Mana yang bisa menggelinding?", text: "Mana yang bisa menggelinding?", options: ["Kubus", "Bola"], answer: "Bola" },
+                { type: 'choice', q: "Dadu bentuknya apa?", text: "Dadu bentuknya apa?", options: ["Kubus", "Bola"], answer: "Kubus" },
+                { type: 'choice', q: "Mana yang seperti tabung?", text: "Mana yang seperti tabung?", options: ["Gelas", "Buku"], answer: "Gelas" },
+                { type: 'choice', q: "Piramida di Mesir bentuknya apa?", text: "Piramida di Mesir bentuknya apa?", options: ["Piramida", "Kubus"], answer: "Piramida" },
+                { type: 'choice', q: "Rubik bentuknya apa?", text: "Rubik bentuknya apa?", options: ["Kubus", "Bola"], answer: "Kubus" },
+                { type: 'choice', q: "Mana yang bisa ditumpuk?", text: "Mana yang bisa ditumpuk?", options: ["Bola", "Kotak"], answer: "Kotak" }
+            ]},
+            { title: "Latihan 2.10: Review Bentuk", questions: [
+                { type: 'choice', q: "Hitung semua bentuk: 🟥🔺🔵⭐", text: "Hitung semua bentuk", options: ["3", "4", "5"], answer: "4" },
+                { type: 'choice', q: "Bentuk apa yang punya 4 sisi?", text: "Bentuk apa yang punya empat sisi?", options: ["Persegi", "Segitiga"], answer: "Persegi" },
+                { type: 'choice', q: "Bentuk apa yang bulat?", text: "Bentuk apa yang bulat?", options: ["Lingkaran", "Persegi"], answer: "Lingkaran" },
+                { type: 'choice', q: "Bentuk apa yang seperti atap?", text: "Bentuk apa yang seperti atap?", options: ["Segitiga", "Persegi"], answer: "Segitiga" },
+                { type: 'choice', q: "Berapa jumlah sudut 🟥 dan 🔺?", text: "Berapa jumlah sudut persegi dan segitiga?", options: ["6", "7", "8"], answer: "7" },
+                { type: 'choice', q: "Mana yang bukan bentuk 2D?", text: "Mana yang bukan bentuk dua dimensi?", options: ["Lingkaran", "Kubus"], answer: "Kubus" },
+                { type: 'choice', q: "Hitung 🔺: 🔺🔺🟥🔵🔺", text: "Hitung segitiga", options: ["2", "3", "4"], answer: "3" },
+                { type: 'choice', q: "Hitung 🔵: 🔵🔵🔺🟥🔵", text: "Hitung lingkaran", options: ["2", "3", "4"], answer: "3" },
+                { type: 'choice', q: "Sebutkan 1 benda berbentuk persegi.", text: "Sebutkan satu benda berbentuk persegi.", options: ["Buku", "Bola"], answer: "Buku" },
+                { type: 'choice', q: "Mana yang berbentuk lingkaran?", text: "Mana yang berbentuk lingkaran?", options: ["Roda", "Penggaris"], answer: "Roda" }
+            ]}
+        ]
+    },
+    {
+        topicTitle: "Bagian 3: Mengenal Pola",
+        worksheets: [
+            { title: "Latihan 3.1: Pola Warna (AB)", questions: [
+                { type: 'choice', q: "Lanjutkan: 🔴🔵🔴__", text: "Lanjutkan pola: merah, biru, merah, ...", options: ["🔴", "🔵"], answer: "🔵" },
+                { type: 'choice', q: "Lanjutkan: 💚💛💚__", text: "Lanjutkan pola: hijau, kuning, hijau, ...", options: ["💚", "💛"], answer: "💛" },
+                { type: 'choice', q: "Lanjutkan: 🧡💜🧡__", text: "Lanjutkan pola: oranye, ungu, oranye, ...", options: ["🧡", "💜"], answer: "💜" },
+                { type: 'choice', q: "Pola: hitam, putih, hitam, __", text: "Pola: hitam, putih, hitam, ...", options: ["hitam", "putih"], answer: "putih" },
+                { type: 'choice', q: "Lanjutkan: 🔴⚪️🔴⚪️__", text: "Lanjutkan pola: merah, putih, merah, putih, ...", options: ["🔴", "⚪️"], answer: "🔴" },
+                { type: 'choice', q: "Lanjutkan: 💛💙💛💙__", text: "Lanjutkan pola: kuning, biru, kuning, biru, ...", options: ["💛", "💙"], answer: "💛" },
+                { type: 'choice', q: "Lengkapi: ⚫️⚪️⚫️__", text: "Lengkapi: hitam, putih, hitam, ...", options: ["⚫️", "⚪️"], answer: "⚪️" },
+                { type: 'choice', q: "Lengkapi: 🟫⬛️🟫__", text: "Lengkapi: coklat, hitam, coklat, ...", options: ["🟫", "⬛️"], answer: "⬛️" },
+                { type: 'choice', q: "Lengkapi: 🟩🟨🟩__", text: "Lengkapi: hijau, kuning, hijau, ...", options: ["🟩", "🟨"], answer: "🟨" },
+                { type: 'choice', q: "Pola: pink, biru, pink, __", text: "Pola: pink, biru, pink, ...", options: ["pink", "biru"], answer: "biru" },
+            ]},
+            { title: "Latihan 3.2: Pola Bentuk (AB)", questions: [
+                { type: 'choice', q: "Lanjutkan: 🔵🟥🔵__", text: "Lanjutkan pola: lingkaran, persegi, lingkaran, ...", options: ["🔵", "🟥"], answer: "🟥" },
+                { type: 'choice', q: "Lanjutkan: 🔺⭐🔺__", text: "Lanjutkan pola: segitiga, bintang, segitiga, ...", options: ["🔺", "⭐"], answer: "⭐" },
+                { type: 'choice', q: "Lanjutkan: ❤️🟩❤️__", text: "Lanjutkan pola: hati, persegi, hati, ...", options: ["❤️", "🟩"], answer: "🟩" },
+                { type: 'choice', q: "Pola: 🟥🔺🟥__", text: "Pola: persegi, segitiga, persegi, ...", options: ["🟥", "🔺"], answer: "🔺" },
+                { type: 'choice', q: "Pola: ⭐🔵⭐__", text: "Pola: bintang, lingkaran, bintang, ...", options: ["⭐", "🔵"], answer: "🔵" },
+                { type: 'choice', q: "Pola: 🟥🔵🟥🔵__", text: "Pola: persegi, lingkaran, persegi, lingkaran, ...", options: ["🟥", "🔵"], answer: "🟥" },
+                { type: 'choice', q: "Pola: 🔺❤️🔺❤️__", text: "Pola: segitiga, hati, segitiga, hati, ...", options: ["🔺", "❤️"], answer: "🔺" },
+                { type: 'choice', q: "Lengkapi: 🔵🟥🔵__", text: "Lengkapi: lingkaran, persegi, lingkaran, ...", options: ["🔵", "🟥"], answer: "🟥" },
+                { type: 'choice', q: "Lengkapi: 🟩⭐🟩__", text: "Lengkapi: persegi, bintang, persegi, ...", options: ["🟩", "⭐"], answer: "⭐" },
+                { type: 'choice', q: "Lengkapi: ❤️🔺❤️__", text: "Lengkapi: hati, segitiga, hati, ...", options: ["❤️", "🔺"], answer: "🔺" }
+            ]},
+            { title: "Latihan 3.3: Pola Benda (AB)", questions: [
+                { type: 'choice', q: "Lanjutkan: 🍎🍌🍎__", text: "Lanjutkan pola: apel, pisang, apel, ...", options: ["🍎", "🍌"], answer: "🍌" },
+                { type: 'choice', q: "Lanjutkan: 🚗🚲🚗__", text: "Lanjutkan pola: mobil, sepeda, mobil, ...", options: ["🚗", "🚲"], answer: "🚲" },
+                { type: 'choice', q: "Lanjutkan: 🐶🐱🐶__", text: "Lanjutkan pola: anjing, kucing, anjing, ...", options: ["🐶", "🐱"], answer: "🐱" },
+                { type: 'choice', q: "Pola: ☀️🌙☀️__", text: "Pola: matahari, bulan, matahari, ...", options: ["☀️", "🌙"], answer: "🌙" },
+                { type: 'choice', q: "Pola: 📚✏️📚✏️__", text: "Pola: buku, pensil, buku, pensil, ...", options: ["📚", "✏️"], answer: "📚" },
+                { type: 'choice', q: "Pola: 🏠🌳🏠🌳__", text: "Pola: rumah, pohon, rumah, pohon, ...", options: ["🏠", "🌳"], answer: "🏠" },
+                { type: 'choice', q: "Lengkapi: 🧦👟🧦__", text: "Lengkapi: kaos kaki, sepatu, kaos kaki, ...", options: ["🧦", "👟"], answer: "👟" },
+                { type: 'choice', q: "Lengkapi: 👦👧👦__", text: "Lengkapi: anak laki-laki, anak perempuan, anak laki-laki, ...", options: ["👦", "👧"], answer: "👧" },
+                { type: 'choice', q: "Lengkapi: 🌷🌸🌷__", text: "Lengkapi: tulip, bunga sakura, tulip, ...", options: ["🌷", "🌸"], answer: "🌸" },
+                { type: 'choice', q: "Pola: sendok, garpu, sendok, __", text: "Pola: sendok, garpu, sendok, ...", options: ["sendok", "garpu"], answer: "garpu" }
+            ]},
+             { title: "Latihan 3.4: Pola AAB", questions: [
+                { type: 'choice', q: "Lanjutkan: 🔴🔴🔵🔴🔴__", text: "Lanjutkan pola: merah, merah, biru, merah, merah, ...", options: ["🔴", "🔵"], answer: "🔵" },
+                { type: 'choice', q: "Lanjutkan: 💚💚💛💚💚__", text: "Lanjutkan pola: hijau, hijau, kuning, hijau, hijau, ...", options: ["💚", "💛"], answer: "💛" },
+                { type: 'choice', q: "Lanjutkan: 🍎🍎🍌🍎🍎__", text: "Lanjutkan pola: apel, apel, pisang, apel, apel, ...", options: ["🍎", "🍌"], answer: "🍌" },
+                { type: 'choice', q: "Pola: 🔵🔵🟥🔵🔵__", text: "Pola: lingkaran, lingkaran, persegi, lingkaran, lingkaran, ...", options: ["🔵", "🟥"], answer: "🟥" },
+                { type: 'choice', q: "Pola: 🚗🚗🚲🚗🚗__", text: "Pola: mobil, mobil, sepeda, mobil, mobil, ...", options: ["🚗", "🚲"], answer: "🚲" },
+                { type: 'choice', q: "Pola: 1, 1, 2, 1, 1, __", text: "Pola: satu, satu, dua, satu, satu, ...", options: ["1", "2"], answer: "2" },
+                { type: 'choice', q: "Lengkapi: 🔺🔺🟥🔺🔺__", text: "Lengkapi: segitiga, segitiga, persegi, segitiga, segitiga, ...", options: ["🔺", "🟥"], answer: "🟥" },
+                { type: 'choice', q: "Lengkapi: 🐱🐱🐶🐱🐱__", text: "Lengkapi: kucing, kucing, anjing, kucing, kucing, ...", options: ["🐱", "🐶"], answer: "🐶" },
+                { type: 'choice', q: "Lengkapi: Tepuk, Tepuk, Diam, Tepuk, Tepuk, __", text: "Lengkapi: Tepuk, Tepuk, Diam, Tepuk, Tepuk, ...", options: ["Tepuk", "Diam"], answer: "Diam" },
+                { type: 'choice', q: "Lengkapi: 💜💜🧡💜💜__", text: "Lengkapi: ungu, ungu, oranye, ungu, ungu, ...", options: ["💜", "🧡"], answer: "🧡" }
+            ]},
+             { title: "Latihan 3.5: Pola ABB", questions: [
+                { type: 'choice', q: "Lanjutkan: 🔴🔵🔵🔴__", text: "Lanjutkan pola: merah, biru, biru, merah, ...", options: ["🔴", "🔵"], answer: "🔵" },
+                { type: 'choice', q: "Lanjutkan: 💚💛💛💚__", text: "Lanjutkan pola: hijau, kuning, kuning, hijau, ...", options: ["💚", "💛"], answer: "💛" },
+                { type: 'choice', q: "Lanjutkan: 🍎🍌🍌🍎__", text: "Lanjutkan pola: apel, pisang, pisang, apel, ...", options: ["🍎", "🍌"], answer: "🍌" },
+                { type: 'choice', q: "Pola: 🔵🟥🟥🔵__", text: "Pola: lingkaran, persegi, persegi, lingkaran, ...", options: ["🔵", "🟥"], answer: "🟥" },
+                { type: 'choice', q: "Pola: 🚗🚲🚲🚗__", text: "Pola: mobil, sepeda, sepeda, mobil, ...", options: ["🚗", "🚲"], answer: "🚲" },
+                { type: 'choice', q: "Pola: 1, 2, 2, 1, __", text: "Pola: satu, dua, dua, satu, ...", options: ["1", "2"], answer: "2" },
+                { type: 'choice', q: "Lengkapi: 🔺🟥🟥🔺__", text: "Lengkapi: segitiga, persegi, persegi, segitiga, ...", options: ["🔺", "🟥"], answer: "🟥" },
+                { type: 'choice', q: "Lengkapi: 🐱🐶🐶🐱__", text: "Lengkapi: kucing, anjing, anjing, kucing, ...", options: ["🐱", "🐶"], answer: "🐶" },
+                { type: 'choice', q: "Lengkapi: Diam, Tepuk, Tepuk, Diam, __", text: "Lengkapi: Diam, Tepuk, Tepuk, Diam, ...", options: ["Diam", "Tepuk"], answer: "Tepuk" },
+                { type: 'choice', q: "Lengkapi: 💜🧡🧡💜__", text: "Lengkapi: ungu, oranye, oranye, ungu, ...", options: ["💜", "🧡"], answer: "🧡" }
+            ]},
+            { title: "Latihan 3.6: Pola ABC", questions: [
+                { type: 'choice', q: "Lanjutkan: 🔴🔵💚🔴__", text: "Lanjutkan pola: merah, biru, hijau, merah, ...", options: ["🔵", "💚"], answer: "🔵" },
+                { type: 'choice', q: "Lanjutkan: 🍎🍌🍊🍎__", text: "Lanjutkan pola: apel, pisang, jeruk, apel, ...", options: ["🍌", "🍊"], answer: "🍌" },
+                { type: 'choice', q: "Lanjutkan: 🟥🔺🔵🟥__", text: "Lanjutkan pola: persegi, segitiga, lingkaran, persegi, ...", options: ["🔺", "🔵"], answer: "🔺" },
+                { type: 'choice', q: "Pola: 1, 2, 3, 1, __", text: "Pola: satu, dua, tiga, satu, ...", options: ["2", "3"], answer: "2" },
+                { type: 'choice', q: "Pola: 🐶🐱🐦🐶__", text: "Pola: anjing, kucing, burung, anjing, ...", options: ["🐱", "🐦"], answer: "🐱" },
+                { type: 'choice', q: "Pola: A, B, C, A, B, __", text: "Pola: A, B, C, A, B, ...", options: ["A", "C"], answer: "C" },
+                { type: 'choice', q: "Lengkapi: 💛💜🧡💛💜__", text: "Lengkapi: kuning, ungu, oranye, kuning, ungu, ...", options: ["💛", "🧡"], answer: "🧡" },
+                { type: 'choice', q: "Lengkapi: Atas, Bawah, Kanan, Atas, __", text: "Lengkapi: Atas, Bawah, Kanan, Atas, ...", options: ["Bawah", "Kanan"], answer: "Bawah" },
+                { type: 'choice', q: "Lengkapi: 🚗🚲🛵🚗__", text: "Lengkapi: mobil, sepeda, motor, mobil, ...", options: ["🚲", "🛵"], answer: "🚲" },
+                { type: 'choice', q: "Lengkapi: ☀️☁️🌙☀️__", text: "Lengkapi: matahari, awan, bulan, matahari, ...", options: ["☁️", "🌙"], answer: "☁️" }
+            ]},
+            { title: "Latihan 3.7: Pola Ukuran", questions: [
+                { type: 'choice', q: "Lanjutkan: 🔵 (besar) 🔵 (kecil) 🔵 (besar) __", text: "Lanjutkan pola: lingkaran besar, lingkaran kecil, lingkaran besar, ...", options: ["Besar", "Kecil"], answer: "Kecil" },
+                { type: 'choice', q: "Lanjutkan: 🟥 (kecil) 🟥 (besar) 🟥 (kecil) __", text: "Lanjutkan pola: persegi kecil, persegi besar, persegi kecil, ...", options: ["Besar", "Kecil"], answer: "Besar" },
+                { type: 'choice', q: "Pola: 🌳 (tinggi) 🌳 (pendek) 🌳 (tinggi) __", text: "Pola: pohon tinggi, pohon pendek, pohon tinggi, ...", options: ["Tinggi", "Pendek"], answer: "Pendek" },
+                { type: 'choice', q: "Pola: 🔺 (besar) 🔺 (besar) 🔺 (kecil) ... 🔺 (besar) __", text: "Pola: besar, besar, kecil, besar, besar, ...", options: ["Besar", "Kecil"], answer: "Kecil" },
+                { type: 'choice', q: "Pola: 🚶 (besar) 🚶 (kecil) 🚶 (kecil) 🚶 (besar) __", text: "Pola: besar, kecil, kecil, besar, ...", options: ["Besar", "Kecil"], answer: "Kecil" },
+                { type: 'choice', q: "Urutkan: 🎈 (sedang), 🎈 (kecil), 🎈 (besar)", text: "Urutkan dari kecil ke besar", options: ["kecil,sedang,besar", "besar,sedang,kecil"], answer: "kecil,sedang,besar" },
+                { type: 'choice', q: "Urutkan: 🏠 (besar), 🏠 (kecil), 🏠 (sedang)", text: "Urutkan dari besar ke kecil", options: ["kecil,sedang,besar", "besar,sedang,kecil"], answer: "besar,sedang,kecil" },
+                { type: 'choice', q: "Pola: pendek, tinggi, pendek, __", text: "Pola: pendek, tinggi, pendek, ...", options: ["pendek", "tinggi"], answer: "tinggi" },
+                { type: 'choice', q: "Pola: panjang, pendek, panjang, __", text: "Pola: panjang, pendek, panjang, ...", options: ["panjang", "pendek"], answer: "pendek" },
+                { type: 'choice', q: "Pola: gemuk, kurus, gemuk, __", text: "Pola: gemuk, kurus, gemuk, ...", options: ["gemuk", "kurus"], answer: "kurus" }
+            ]},
+            { title: "Latihan 3.8: Pola Arah", questions: [
+                { type: 'choice', q: "Lanjutkan: ➡️⬅️➡️__", text: "Lanjutkan pola: kanan, kiri, kanan, ...", options: ["➡️", "⬅️"], answer: "⬅️" },
+                { type: 'choice', q: "Lanjutkan: ⬆️⬇️⬆️__", text: "Lanjutkan pola: atas, bawah, atas, ...", options: ["⬆️", "⬇️"], answer: "⬇️" },
+                { type: 'choice', q: "Pola: ➡️➡️⬅️➡️➡️__", text: "Pola: kanan, kanan, kiri, kanan, kanan, ...", options: ["➡️", "⬅️"], answer: "⬅️" },
+                { type: 'choice', q: "Pola: ⬆️⬆️⬇️⬆️⬆️__", text: "Pola: atas, atas, bawah, atas, atas, ...", options: ["⬆️", "⬇️"], answer: "⬇️" },
+                { type: 'choice', q: "Pola: ⬅️⬆️⬅️__", text: "Pola: kiri, atas, kiri, ...", options: ["⬅️", "⬆️"], answer: "⬆️" },
+                { type: 'choice', q: "Pola: Maju, Mundur, Maju, __", text: "Pola: Maju, Mundur, Maju, ...", options: ["Maju", "Mundur"], answer: "Mundur" },
+                { type: 'choice', q: "Lengkapi: ➡️⬇️⬅️⬆️➡️__", text: "Lengkapi: kanan, bawah, kiri, atas, kanan, ...", options: ["⬇️", "⬅️"], answer: "⬇️" },
+                { type: 'choice', q: "Lengkapi: Kanan, Kanan, Kiri, __", text: "Lengkapi: Kanan, Kanan, Kiri, ...", options: ["Kanan", "Kiri"], answer: "Kanan" },
+                { type: 'choice', q: "Lengkapi: Atas, Bawah, Bawah, Atas, __", text: "Lengkapi: Atas, Bawah, Bawah, Atas, ...", options: ["Atas", "Bawah"], answer: "Bawah" },
+                { type: 'choice', q: "Lengkapi: ⬅️⬅️➡️⬅️⬅️__", text: "Lengkapi: kiri, kiri, kanan, kiri, kiri, ...", options: ["⬅️", "➡️"], answer: "➡️" }
+            ]},
+            { title: "Latihan 3.9: Membuat Pola Sendiri", questions: [
+                { type: 'choice', q: "Buat pola AB: 🔴__", text: "Buat pola AB: merah, ...", options: ["🔴", "🔵"], answer: "🔵" },
+                { type: 'choice', q: "Buat pola AAB: 🔵🔵__", text: "Buat pola AAB: lingkaran, lingkaran, ...", options: ["🔵", "🟥"], answer: "🟥" },
+                { type: 'choice', q: "Buat pola ABC: 🍎🍌__", text: "Buat pola ABC: apel, pisang, ...", options: ["🍊", "🍎"], answer: "🍊" },
+                { type: 'choice', q: "Lanjutkan polamu: 1, 5, 1, __", text: "Lanjutkan polamu: satu, lima, satu, ...", options: ["1", "5"], answer: "5" },
+                { type: 'choice', q: "Pola: siang, malam, siang, __", text: "Pola: siang, malam, siang, ...", options: ["siang", "malam"], answer: "malam" },
+                { type: 'choice', q: "Pola suara: Meong, Guk, Meong, __", text: "Pola suara: Meong, Guk, Meong, ...", options: ["Meong", "Guk"], answer: "Guk" },
+                { type: 'choice', q: "Pola ABC: 1, 2, __", text: "Pola ABC: satu, dua, ...", options: ["1", "3"], answer: "3" },
+                { type: 'choice', q: "Pola AAB: Kucing, Kucing, __", text: "Pola AAB: Kucing, Kucing, ...", options: ["Anjing", "Kucing"], answer: "Anjing" },
+                { type: 'choice', q: "Pola ABB: Apel, Pisang, __", text: "Pola ABB: Apel, Pisang, ...", options: ["Apel", "Pisang"], answer: "Pisang" },
+                { type: 'choice', q: "Pola: Tepuk, Hentak, Tepuk, __", text: "Pola: Tepuk, Hentak, Tepuk, ...", options: ["Tepuk", "Hentak"], answer: "Hentak" },
+            ]},
+             { title: "Latihan 3.10: Review Pola", questions: [
+                { type: 'choice', q: "Pola apa ini? 🔴🔵🔴🔵", text: "Pola apa ini? merah, biru, merah, biru", options: ["AB", "AAB"], answer: "AB" },
+                { type: 'choice', q: "Pola apa ini? 🔴🔴🔵🔴🔴🔵", text: "Pola apa ini? merah, merah, biru, merah, merah, biru", options: ["ABB", "AAB"], answer: "AAB" },
+                { type: 'choice', q: "Lanjutkan: 1, 2, 3, 1, __", text: "Lanjutkan: satu, dua, tiga, satu, ...", options: ["2", "4"], answer: "2" },
+                { type: 'choice', q: "Lanjutkan: 🔺🔺🔵🔺🔺__", text: "Lanjutkan: segitiga, segitiga, lingkaran, segitiga, segitiga, ...", options: ["🔺", "🔵"], answer: "🔵" },
+                { type: 'choice', q: "Lanjutkan: 🍎🍌🍌🍎__", text: "Lanjutkan: apel, pisang, pisang, apel, ...", options: ["🍎", "🍌"], answer: "🍌" },
+                { type: 'choice', q: "Pola: Kanan, Kiri, Kanan, __", text: "Pola: Kanan, Kiri, Kanan, ...", options: ["Kanan", "Kiri"], answer: "Kiri" },
+                { type: 'choice', q: "Pola: 🔼🔽🔼__", text: "Pola: atas, bawah, atas, ...", options: ["🔼", "🔽"], answer: "🔽" },
+                { type: 'choice', q: "Pola apa ini? 🔴🔵🔵", text: "Pola apa ini? merah, biru, biru", options: ["AAB", "ABB"], answer: "ABB" },
+                { type: 'choice', q: "Lanjutkan: A, B, A, B, __", text: "Lanjutkan: A, B, A, B, ...", options: ["A", "B"], answer: "A" },
+                { type: 'choice', q: "Lanjutkan: 10, 20, 10, __", text: "Lanjutkan: sepuluh, dua puluh, sepuluh, ...", options: ["10", "20"], answer: "20" }
+            ]}
+        ]
+    }
+];
+
+// --- JAVASCRIPT LOGIC ---
+document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = today.toLocaleDateString('id-ID', options);
+    
+    const container = document.getElementById('worksheet-container');
+    let flatWorksheetIndex = 0;
+
+    topics.forEach(topic => {
+        const topicHeader = document.createElement('div');
+        topicHeader.className = 'topic-header';
+        topicHeader.textContent = topic.topicTitle;
+        container.appendChild(topicHeader);
+
+        topic.worksheets.forEach((worksheetData) => {
+            const page = document.createElement('section');
+            page.className = 'page page-content';
+            page.id = `latihan-${flatWorksheetIndex + 1}`;
+            page.dataset.worksheetIndex = flatWorksheetIndex;
+            
+            page.innerHTML = `
+                <div class="content-wrapper">
+                    <header class="page-header">
+                        <div class="header-top">
+                            <img src="https://imgix3.ruangguru.com/assets/miscellaneous/png_tiy3nf_6017.png" alt="Logo">
+                            <div class="score-display">Skor: <span class="score-count">0</span>/${worksheetData.questions.length}</div>
+                        </div>
+                        <div class="header-bottom">
+                            <span>Nama: <input type="text" class="info-input name-input" placeholder="Ketik nama di sini..."></span>
+                            <span>Tanggal: <input type="text" class="info-input date-input" value="${formattedDate}" readonly></span>
+                        </div>
+                    </header>
+                    <h2 class="worksheet-title">${worksheetData.title}</h2>
+                    <div class="soal-container"></div>
+                    <div class="page-footer-container"></div>
+                </div>`;
+            
+            container.appendChild(page);
+            renderWorksheet(flatWorksheetIndex);
+            flatWorksheetIndex++;
+        });
+    });
+});
+
+function speak(text) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'id-ID';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+}
+
+function getWorksheetAndQuestion(worksheetIndex) {
+    let flatIndex = 0;
+    for (const topic of topics) {
+        if (worksheetIndex < flatIndex + topic.worksheets.length) {
+            return topic.worksheets[worksheetIndex - flatIndex];
+        }
+        flatIndex += topic.worksheets.length;
+    }
+    return null;
+}
+
+function renderWorksheet(worksheetIndex) {
+    const page = document.getElementById(`latihan-${worksheetIndex + 1}`);
+    if (!page) return;
+
+    const soalContainer = page.querySelector('.soal-container');
+    const worksheetData = getWorksheetAndQuestion(worksheetIndex);
+    if (!worksheetData) return;
+    const questionSet = worksheetData.questions;
+
+    soalContainer.innerHTML = '';
+    
+    questionSet.forEach((q, index) => {
+        const itemWrapper = document.createElement('div');
+        itemWrapper.className = 'soal-item-wrapper';
+        
+        let answerHTML = `<div class="choice-wrapper">`;
+        q.options.forEach(opt => {
+             answerHTML += `<button class="choice-btn" data-answer="${q.answer}">${opt}</button>`;
+        });
+        answerHTML += `</div>`;
+        
+
+        const soalLatihanHTML = `
+            <div class="soal-latihan">
+                <div class="soal-grid">
+                    <div class="soal-nomor">${index + 1}.</div>
+                    <button class="speak-btn" aria-label="Dengarkan soal">🔊</button>
+                    <div class="soal-konten">
+                        <p>${q.q}</p>
+                    </div>
+                </div>
+                ${answerHTML}
+            </div>`;
+        itemWrapper.innerHTML = soalLatihanHTML;
+        itemWrapper.querySelector('.speak-btn').onclick = () => speak(q.text);
+        
+        itemWrapper.querySelectorAll('.choice-btn').forEach(btn => {
+            btn.addEventListener('click', (event) => checkChoiceAnswer(event.target));
+        });
+        
+        soalContainer.appendChild(itemWrapper);
+    });
+    
+    const footerContainer = page.querySelector('.page-footer-container');
+    footerContainer.innerHTML = `<button class="footer-btn check-all-btn">Selesai & Periksa Semua</button>`;
+    footerContainer.querySelector('.check-all-btn').addEventListener('click', () => checkAllAnswers(worksheetIndex));
+}
+
+const correctFeedback = ["Kamu hebat!", "Luar biasa!", "Pintar sekali!", "Benar!"];
+const incorrectFeedback = ["Coba lagi yuk!", "Hampir benar, ayo coba lagi!", "Jangan menyerah!"];
+
+function playCorrectSound() {
+    const message = correctFeedback[Math.floor(Math.random() * correctFeedback.length)];
+    speak(message);
+}
+
+function playIncorrectSound() {
+    const message = incorrectFeedback[Math.floor(Math.random() * incorrectFeedback.length)];
+    speak(message);
+}
+
+function checkChoiceAnswer(buttonElement) {
+    if (buttonElement.parentElement.querySelector('.correct')) return;
+
+    const userAnswer = buttonElement.textContent.trim().toLowerCase();
+    const correctAnswer = buttonElement.dataset.answer.trim().toLowerCase();
+
+    // Normalize emoji answers for comparison
+    const normalizedUserAnswer = userAnswer.replace(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g, '').length.toString();
+    const normalizedCorrectAnswer = correctAnswer.replace(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g, '').length.toString();
+    
+    // Fallback for non-emoji text
+    const finalUserAnswer = isNaN(parseInt(userAnswer)) ? userAnswer : normalizedUserAnswer;
+    const finalCorrectAnswer = isNaN(parseInt(correctAnswer)) ? correctAnswer : normalizedCorrectAnswer;
+
+    if (finalUserAnswer === finalCorrectAnswer || userAnswer === correctAnswer) {
+        buttonElement.classList.add('correct');
+        playCorrectSound();
+        buttonElement.parentElement.querySelectorAll('.choice-btn').forEach(btn => {
+            btn.disabled = true;
+        });
+    } else {
+        buttonElement.classList.add('incorrect');
+        playIncorrectSound();
+        setTimeout(() => {
+            buttonElement.classList.remove('incorrect');
+        }, 1000);
+    }
+    updateScore(buttonElement.closest('.page'));
+}
+
+
+function checkAllAnswers(worksheetIndex) {
+    const page = document.getElementById(`latihan-${worksheetIndex + 1}`);
+    
+    // Disable all choice buttons
+    page.querySelectorAll('.choice-btn').forEach(btn => {
+        btn.disabled = true;
+        // Mark correct answers if not already answered
+        if (!btn.parentElement.querySelector('.correct')) {
+            const userAnswer = btn.textContent.trim().toLowerCase();
+            const correctAnswer = btn.dataset.answer.trim().toLowerCase();
+             if (userAnswer === correctAnswer) {
+                btn.classList.add('correct');
+            }
+        }
+    });
+
+    updateScore(page);
+    
+    const footerContainer = page.querySelector('.page-footer-container');
+    footerContainer.innerHTML = `
+        <div class="feedback-message"></div>
+        <button class="footer-btn try-again-btn">Ulangi Latihan Ini</button>
+    `;
+    footerContainer.querySelector('.try-again-btn').addEventListener('click', () => retryWorksheet(worksheetIndex));
+    updateScore(page, true); // Final update
+}
+
+
+function getFeedbackMessage(score, total) {
+    const percentage = (score / total) * 100;
+    if (score === 0) return "Ayo, coba lagi! Kamu pasti bisa!";
+    if (percentage < 50) return "Jangan menyerah, coba lagi ya, semangat!";
+    if (percentage < 80) return "Bagus! Sedikit lagi sempurna!";
+    if (percentage < 100) return "Hebat! Kamu hampir benar semua!";
+    return "Luar biasa! Kamu benar semua!";
+}
+
+function updateScore(pageElement, isFinal = false) {
+    const scoreSpan = pageElement.querySelector('.score-count');
+    const totalQuestions = getWorksheetAndQuestion(pageElement.dataset.worksheetIndex).questions.length;
+    
+    const correctChoices = pageElement.querySelectorAll('.choice-btn.correct').length;
+    const correctCount = correctChoices;
+
+    scoreSpan.textContent = correctCount;
+
+    if (isFinal) {
+        const footerContainer = pageElement.querySelector('.page-footer-container');
+        const feedbackMessageDiv = footerContainer.querySelector('.feedback-message');
+        if (feedbackMessageDiv) {
+            feedbackMessageDiv.textContent = getFeedbackMessage(correctCount, totalQuestions);
+        }
+    }
+}
+
+function retryWorksheet(worksheetIndex) {
+    const page = document.getElementById(`latihan-${worksheetIndex + 1}`);
+    renderWorksheet(worksheetIndex);
+    page.querySelector('.score-count').textContent = '0';
+}
+</script>
+
+</body>
+</html>
+
