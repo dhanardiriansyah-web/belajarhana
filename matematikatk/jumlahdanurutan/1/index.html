@@ -297,14 +297,14 @@
         }
         
         .footer-btn {
-             padding: 12px 30px;
-             font-size: 14pt;
-             font-weight: 700;
-             cursor: pointer;
-             border-radius: 8px;
-             color: white;
-             border: none;
-             transition: transform 0.2s;
+            padding: 12px 30px;
+            font-size: 14pt;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 8px;
+            color: white;
+            border: none;
+            transition: transform 0.2s;
         }
         .footer-btn:hover {
             transform: scale(1.05);
@@ -315,10 +315,10 @@
         }
 
         .try-again-btn {
-             background-color: var(--try-again-bg);
+            background-color: var(--try-again-bg);
         }
         .try-again-btn:hover {
-             background-color: var(--try-again-hover-bg);
+            background-color: var(--try-again-hover-bg);
         }
 
         .soal-grid {
@@ -881,33 +881,33 @@ function playIncorrectSound() {
     speak(message);
 }
 
+// --- FUNCTION YANG DIPERBAIKI ---
 function checkChoiceAnswer(buttonElement) {
+    // Jangan lakukan apa-apa jika pertanyaan ini sudah dijawab dengan benar
     if (buttonElement.parentElement.querySelector('.correct')) return;
 
-    const userAnswer = buttonElement.textContent.trim().toLowerCase();
-    const correctAnswer = buttonElement.dataset.answer.trim().toLowerCase();
+    const userAnswer = buttonElement.textContent.trim();
+    const correctAnswer = buttonElement.dataset.answer.trim();
 
-    // Normalize emoji answers for comparison
-    const normalizedUserAnswer = userAnswer.replace(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g, '').length.toString();
-    const normalizedCorrectAnswer = correctAnswer.replace(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g, '').length.toString();
-    
-    // Fallback for non-emoji text
-    const finalUserAnswer = isNaN(parseInt(userAnswer)) ? userAnswer : normalizedUserAnswer;
-    const finalCorrectAnswer = isNaN(parseInt(correctAnswer)) ? correctAnswer : normalizedCorrectAnswer;
-
-    if (finalUserAnswer === finalCorrectAnswer || userAnswer === correctAnswer) {
+    // Bandingkan jawaban pengguna dengan jawaban yang benar
+    if (userAnswer === correctAnswer) {
         buttonElement.classList.add('correct');
-        playCorrectSound();
+        // Nonaktifkan semua tombol pilihan untuk pertanyaan ini
         buttonElement.parentElement.querySelectorAll('.choice-btn').forEach(btn => {
             btn.disabled = true;
         });
+        playCorrectSound(); // Mainkan suara feedback benar
     } else {
         buttonElement.classList.add('incorrect');
-        playIncorrectSound();
+        playIncorrectSound(); // Mainkan suara feedback salah
+        
+        // Hapus warna merah setelah beberapa saat agar pengguna bisa mencoba lagi
         setTimeout(() => {
             buttonElement.classList.remove('incorrect');
-        }, 1000);
+        }, 800);
     }
+
+    // Perbarui skor
     updateScore(buttonElement.closest('.page'));
 }
 
@@ -915,13 +915,13 @@ function checkChoiceAnswer(buttonElement) {
 function checkAllAnswers(worksheetIndex) {
     const page = document.getElementById(`latihan-${worksheetIndex + 1}`);
     
-    // Disable all choice buttons
+    // Nonaktifkan semua tombol pilihan
     page.querySelectorAll('.choice-btn').forEach(btn => {
         btn.disabled = true;
-        // Mark correct answers if not already answered
+        // Tandai jawaban yang benar jika belum dijawab
         if (!btn.parentElement.querySelector('.correct')) {
-            const userAnswer = btn.textContent.trim().toLowerCase();
-            const correctAnswer = btn.dataset.answer.trim().toLowerCase();
+            const userAnswer = btn.textContent.trim();
+            const correctAnswer = btn.dataset.answer.trim();
              if (userAnswer === correctAnswer) {
                 btn.classList.add('correct');
             }
@@ -936,7 +936,7 @@ function checkAllAnswers(worksheetIndex) {
         <button class="footer-btn try-again-btn">Ulangi Latihan Ini</button>
     `;
     footerContainer.querySelector('.try-again-btn').addEventListener('click', () => retryWorksheet(worksheetIndex));
-    updateScore(page, true); // Final update
+    updateScore(page, true); // Pembaruan skor akhir
 }
 
 
@@ -976,4 +976,3 @@ function retryWorksheet(worksheetIndex) {
 
 </body>
 </html>
-
