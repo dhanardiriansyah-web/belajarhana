@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permainan Logika Anak TK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Menggunakan font Inter dari Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: none; /* Mencegah scrolling saat drag di perangkat mobile */
+        }
+        .game-container {
+            display: none;
+        }
+        .game-container.active {
+            display: block;
+        }
+        .draggable {
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.2s;
+        }
+        .dragging {
+            cursor: grabbing;
+            opacity: 0.6;
+            transform: scale(1.1);
+            z-index: 1000;
+        }
+        .drop-zone {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .drop-zone.hovered {
+            background-color: #f0f9ff; /* light blue */
+            transform: scale(1.05);
+            border-style: solid;
+        }
+        .feedback {
+            font-size: 1.25rem;
+            font-weight: 600;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            margin-top: 1rem;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.5s linear;
+        }
+        .feedback.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .feedback.success {
+            background-color: #dcfce7; /* light green */
+            color: #166534; /* dark green */
+        }
+        .feedback.error {
+            background-color: #fee2e2; /* light red */
+            color: #991b1b; /* dark red */
+        }
+        /* Style untuk Game 3 (Menjodohkan) */
+        .g3-item, .g3-shadow {
+            cursor: pointer;
+            transition: transform 0.2s, border 0.2s;
+        }
+        .g3-item.selected {
+            transform: scale(1.1);
+            border: 4px solid #3b82f6;
+            border-radius: 8px;
+        }
+        .g3-shadow.matched {
+            cursor: default;
+        }
+        /* Style untuk Game 9 (Domino) */
+        .domino {
+            width: 40px; height: 80px; background-color: #ef4444; border: 2px solid #b91c1c; border-radius: 6px;
+            margin: 2px; display: inline-block; transition: transform 0.5s; transform-origin: bottom center;
+        }
+        .domino.fall {
+            transform: rotate(90deg) translateY(-20px) translateX(20px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center p-4 md:p-8">
+
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-blue-600 mb-2">Permainan Logika Ceria</h1>
+        <p class="text-center text-gray-500 mb-6">Pilih permainan untuk mulai belajar sambil bermain!</p>
+
+        <!-- Navigasi Permainan -->
+        <div class="flex flex-wrap justify-center gap-2 md:gap-3 mb-8">
+            <button onclick="switchGame('game1')" class="game-nav-button bg-blue-500 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-600 transition duration-300">1. Sortir</button>
+            <button onclick="switchGame('game2')" class="game-nav-button bg-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow hover:bg-gray-400 transition duration-300">2. Pola</button>
+            <button onclick="switchGame('game3')" class="game-nav-button bg-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow hover:bg-gray-400 transition duration-300">3. Bayangan</button>
+            <button onclick="switchGame('game4')" class="game-nav-button bg-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow hover:bg-gray-400 transition duration-300">4. Siapa Aku?</button>
+            <button onclick="switchGame('game5')" class="game-nav-button bg-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow hover:bg-gray-400 transition duration-300">5. Kotak Ajaib</button>
+            <button onclick="switchGame('game6')" class="game-nav-button bg-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow hover:bg-gray-400 transition duration-300">6. Harta Karun</button>
+            <button onclick="switchGame('game7')" class="game-nav-button bg-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow hover:bg-gray-400 transition duration-300">7. Mana Beda?</button>
+            <button onclick="switchGame('game8')" class="game-nav-button bg-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow hover:bg-gray-400 transition duration-300">8. Menara</button>
+            <button onclick="switchGame('game9')" class="game-nav-button bg-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow hover:bg-gray-400 transition duration-300">9. Domino</button>
+            <button onclick="switchGame('game10')" class="game-nav-button bg-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow hover:bg-gray-400 transition duration-300">10. Jembatan</button>
+        </div>
+
+        <!-- Kontainer untuk setiap permainan -->
+        <div id="game-content" class="border-2 border-gray-200 border-dashed rounded-xl p-4 md:p-8 min-h-[400px]">
+            
+            <!-- Permainan 1: Keranjang Sortir Ajaib -->
+            <div id="game1" class="game-container active">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(1)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"><svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>Dengarkan</button>
+                </div>
+                <h2 class="text-2xl font-semibold text-center text-gray-800 mb-1">1. Keranjang Sortir Ajaib</h2>
+                <p class="text-center text-gray-600 mb-4">Ayo, masukkan semua bentuk <b class="text-red-500">merah</b> ke keranjang merah dan yang <b class="text-blue-500">biru</b> ke keranjang biru!</p>
+                <div id="g1-items" class="flex flex-wrap justify-center items-center gap-4 p-4 mb-6 bg-gray-50 rounded-lg min-h-[100px]"></div>
+                <div class="flex justify-around gap-4">
+                    <div id="g1-drop-red" data-target="red" class="drop-zone w-1/2 h-40 bg-red-100 border-4 border-dashed border-red-300 rounded-lg flex justify-center items-center text-red-500 font-bold text-xl">Keranjang Merah</div>
+                    <div id="g1-drop-blue" data-target="blue" class="drop-zone w-1/2 h-40 bg-blue-100 border-4 border-dashed border-blue-300 rounded-lg flex justify-center items-center text-blue-500 font-bold text-xl">Keranjang Biru</div>
+                </div>
+                <div id="g1-feedback" class="feedback"></div>
+                <div class="text-center mt-4"><button onclick="setupGame1()" class="bg-green-500 text-white py-2 px-6 rounded-lg shadow hover:bg-green-600 transition">Mulai Lagi</button></div>
+            </div>
+
+            <!-- Permainan 2: Ronce Pola Warna -->
+            <div id="game2" class="game-container">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(2)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"><svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>Dengarkan</button>
+                </div>
+                <h2 class="text-2xl font-semibold text-center text-gray-800 mb-1">2. Ronce Pola Warna</h2>
+                <p class="text-center text-gray-600 mb-4">Perhatikan polanya, lalu klik manik-manik dengan warna yang benar untuk melanjutkannya!</p>
+                <div class="flex justify-center items-center gap-2 p-4 mb-6 bg-gray-50 rounded-lg min-h-[80px]">
+                    <div id="g2-pattern" class="flex gap-2"></div>
+                    <div class="w-12 h-12 border-4 border-dashed border-gray-400 rounded-full"></div>
+                </div>
+                <div id="g2-choices" class="flex justify-center gap-4 mb-4"></div>
+                <div id="g2-feedback" class="feedback"></div>
+                <div class="text-center mt-4"><button onclick="setupGame2()" class="bg-green-500 text-white py-2 px-6 rounded-lg shadow hover:bg-green-600 transition">Pola Baru</button></div>
+            </div>
+
+            <!-- Permainan 3: Jodohkan Bayangan -->
+            <div id="game3" class="game-container">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(3)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"><svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>Dengarkan</button>
+                </div>
+                <h2 class="text-2xl font-semibold text-center text-gray-800 mb-1">3. Jodohkan Bayangan</h2>
+                <p class="text-center text-gray-600 mb-4">Klik satu benda, lalu klik bayangannya yang cocok!</p>
+                <div class="flex flex-col md:flex-row justify-around items-center gap-8">
+                    <div id="g3-items" class="flex flex-col gap-6 p-4"></div>
+                    <div id="g3-shadows" class="flex flex-col gap-6 p-4"></div>
+                </div>
+                <div id="g3-feedback" class="feedback"></div>
+                <div class="text-center mt-4"><button onclick="setupGame3()" class="bg-green-500 text-white py-2 px-6 rounded-lg shadow hover:bg-green-600 transition">Acak Lagi</button></div>
+            </div>
+
+            <!-- Permainan 4: Siapakah Aku? -->
+            <div id="game4" class="game-container">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(4)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"><svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>Dengarkan</button>
+                </div>
+                <h2 class="text-2xl font-semibold text-center text-gray-800 mb-1">4. Siapakah Aku?</h2>
+                <p class="text-center text-gray-600 mb-4">Dengarkan petunjuknya dan tebak siapakah aku!</p>
+                <div class="w-full bg-blue-100 text-blue-800 p-4 rounded-lg text-center mb-6 min-h-[80px] flex items-center justify-center">
+                    <p id="g4-clue" class="text-xl"></p>
+                </div>
+                <div id="g4-choices" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                <div id="g4-feedback" class="feedback"></div>
+                <div class="text-center mt-4"><button onclick="setupGame4()" class="bg-green-500 text-white py-2 px-6 rounded-lg shadow hover:bg-green-600 transition">Pertanyaan Berikutnya</button></div>
+            </div>
+
+             <!-- Permainan 5: Kotak Ajaib (REPLACED) -->
+            <div id="game5" class="game-container">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(5)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"><svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>Dengarkan</button>
+                </div>
+                <h2 class="text-2xl font-semibold text-center text-gray-800 mb-1">5. Kotak Ajaib</h2>
+                <p class="text-center text-gray-600 mb-4">Isi kotak yang kosong dengan gambar yang benar! Satu baris tidak boleh ada gambar yang sama.</p>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+                    <div id="g5-choices" class="flex md:flex-col gap-4"></div>
+                    <div id="g5-grid" class="grid grid-cols-3 gap-1 bg-gray-300 p-1 rounded-lg"></div>
+                </div>
+                <div id="g5-feedback" class="feedback"></div>
+                <div class="text-center mt-6">
+                    <button onclick="checkGame5()" class="bg-blue-500 text-white py-2 px-6 rounded-lg shadow hover:bg-blue-600 transition">Cek Jawaban</button>
+                    <button onclick="setupGame5()" class="bg-green-500 text-white py-2 px-6 rounded-lg shadow hover:bg-green-600 transition ml-4">Mulai Lagi</button>
+                </div>
+            </div>
+            
+            <!-- Permainan 6: Jejak Harta Karun (REVISED) -->
+            <div id="game6" class="game-container">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(6)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"><svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>Dengarkan</button>
+                </div>
+                <h2 class="text-2xl font-semibold text-center text-gray-800 mb-1">6. Jejak Harta Karun</h2>
+                <p class="text-center text-gray-600 mb-4">Gunakan tombol panah untuk menuntun anak ke harta karun!</p>
+                <div class="flex flex-col items-center gap-4">
+                    <div id="g6-grid" class="grid grid-cols-5 gap-1 bg-green-200 p-2 rounded-lg w-max mx-auto"></div>
+                    <div id="g6-controls" class="flex gap-3">
+                        <button onclick="handleG6ArrowClick('up')" class="w-16 h-16 bg-blue-500 text-white text-3xl rounded-lg shadow-lg hover:bg-blue-600">⬆️</button>
+                        <button onclick="handleG6ArrowClick('down')" class="w-16 h-16 bg-blue-500 text-white text-3xl rounded-lg shadow-lg hover:bg-blue-600">⬇️</button>
+                        <button onclick="handleG6ArrowClick('left')" class="w-16 h-16 bg-blue-500 text-white text-3xl rounded-lg shadow-lg hover:bg-blue-600">⬅️</button>
+                        <button onclick="handleG6ArrowClick('right')" class="w-16 h-16 bg-blue-500 text-white text-3xl rounded-lg shadow-lg hover:bg-blue-600">➡️</button>
+                    </div>
+                </div>
+                <div id="g6-feedback" class="feedback"></div>
+                <div class="text-center mt-4"><button onclick="setupGame6()" class="bg-green-500 text-white py-2 px-6 rounded-lg shadow hover:bg-green-600 transition">Misi Baru</button></div>
+            </div>
+
+            <!-- Permainan 7: Mana yang Berbeda? -->
+            <div id="game7" class="game-container">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(7)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"><svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>Dengarkan</button>
+                </div>
+                <h2 class="text-2xl font-semibold text-center text-gray-800 mb-1">7. Mana yang Berbeda?</h2>
+                <p class="text-center text-gray-600 mb-4">Klik pada gambar yang tidak punya teman!</p>
+                <div id="g7-choices" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                <div id="g7-feedback" class="feedback"></div>
+                <div class="text-center mt-4"><button onclick="setupGame7()" class="bg-green-500 text-white py-2 px-6 rounded-lg shadow hover:bg-green-600 transition">Soal Berikutnya</button></div>
+            </div>
+
+            <!-- Permainan 8: Membangun Menara -->
+            <div id="game8" class="game-container">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(8)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"><svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>Dengarkan</button>
+                </div>
+                <h2 class="text-2xl font-semibold text-center text-gray-800 mb-1">8. Membangun Menara</h2>
+                <p class="text-center text-gray-600 mb-4">Bangun menara sesuai aturan yang diberikan!</p>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+                    <div class="w-full md:w-1/3">
+                        <div id="g8-rules" class="bg-yellow-100 p-4 rounded-lg text-yellow-800">
+                            <h3 class="font-bold mb-2">Aturan:</h3>
+                            <ul class="list-disc list-inside"></ul>
+                        </div>
+                        <div id="g8-choices" class="flex justify-center gap-2 mt-4"></div>
+                    </div>
+                    <div id="g8-tower" class="w-24 h-72 bg-gray-200 rounded-t-lg flex flex-col-reverse"></div>
+                </div>
+                <div id="g8-feedback" class="feedback"></div>
+                <div class="text-center mt-4"><button onclick="setupGame8()" class="bg-green-500 text-white py-2 px-6 rounded-lg shadow hover:bg-green-600 transition">Aturan Baru</button></div>
+            </div>
+
+            <!-- Permainan 9: Domino Raksasa -->
+            <div id="game9" class="game-container">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(9)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"><svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>Dengarkan</button>
+                </div>
+                <h2 class="text-2xl font-semibold text-center text-gray-800 mb-1">9. Domino Raksasa</h2>
+                <p class="text-center text-gray-600 mb-4">Apa yang terjadi jika kamu mendorong domino pertama?</p>
+                <div id="g9-domino-area" class="h-48 flex justify-center items-center overflow-hidden"></div>
+                <div id="g9-feedback" class="feedback"></div>
+                <div class="text-center mt-4">
+                    <button onclick="triggerG9Fall()" class="bg-blue-500 text-white py-2 px-6 rounded-lg shadow hover:bg-blue-600 transition">Dorong!</button>
+                    <button onclick="setupGame9()" class="bg-green-500 text-white py-2 px-6 rounded-lg shadow hover:bg-green-600 transition ml-4">Reset</button>
+                </div>
+            </div>
+
+            <!-- Permainan 10: Jembatan untuk Hewan -->
+            <div id="game10" class="game-container">
+                <div class="text-center mb-4">
+                    <button onclick="speakInstruction(10)" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full inline-flex items-center"><svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>Dengarkan</button>
+                </div>
+                <h2 class="text-2xl font-semibold text-center text-gray-800 mb-1">10. Jembatan untuk Hewan</h2>
+                <p class="text-center text-gray-600 mb-4">Bantu hewan menyeberang dengan memilih jembatan yang pas!</p>
+                <div class="relative bg-blue-200 h-64 rounded-lg flex items-center justify-center p-4">
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-5xl">🦊</div>
+                    <div id="g10-gap" data-size="medium" class="drop-zone w-48 h-16 bg-blue-300 border-4 border-dashed border-blue-400"></div>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-5xl">🏠</div>
+                </div>
+                <div id="g10-choices" class="flex justify-center items-end gap-4 mt-6 h-20"></div>
+                <div id="g10-feedback" class="feedback"></div>
+                <div class="text-center mt-4"><button onclick="setupGame10()" class="bg-green-500 text-white py-2 px-6 rounded-lg shadow hover:bg-green-600 transition">Tantangan Baru</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- LOGIKA UMUM (DIPERBAIKI DENGAN CONTOH) ---
+        let activeGameId = 'game1';
+        let draggedItem = null;
+        const synth = window.speechSynthesis;
+
+        // Kumpulan Teks Instruksi
+        const instructions = {
+            1: "Ayo, masukkan semua bentuk merah ke keranjang merah dan yang biru ke keranjang biru!",
+            2: "Perhatikan polanya, lalu klik manik-manik dengan warna yang benar untuk melanjutkannya!",
+            3: "Klik satu benda, lalu klik bayangannya yang cocok!",
+            4: "Dengarkan petunjuknya dan tebak siapakah aku?",
+            5: "Isi kotak yang kosong dengan gambar yang benar! Satu baris tidak boleh ada gambar yang sama.",
+            6: "Gunakan tombol panah untuk menuntun anak ke harta karun!",
+            7: "Klik pada gambar yang tidak punya teman!",
+            8: "Bangun menara sesuai aturan yang diberikan!",
+            9: "Apa yang terjadi jika kamu mendorong domino pertama?",
+            10: "Bantu hewan menyeberang dengan memilih jembatan yang pas!",
+        };
+        
+        // Fungsi untuk membacakan teks (diambil dari contoh)
+        function speak(text) {
+            if (synth.speaking) synth.cancel();
+            if (!text || text.trim() === '') return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.pitch = 1.1;
+            utterance.rate = 0.9;
+            utterance.onerror = (e) => console.error("Speech error:", e);
+            synth.speak(utterance);
+        }
+        
+        function speakInstruction(gameId) {
+            let textToSpeak = instructions[gameId];
+            if (gameId === 4) { // Instruksi khusus untuk game 4
+                textToSpeak += " " + document.getElementById('g4-clue').textContent;
+            }
+            speak(textToSpeak);
+        }
+        
+        function switchGame(gameId) {
+            if (synth.speaking) synth.cancel();
+            
+            if(document.getElementById(activeGameId)) {
+                document.getElementById(activeGameId).classList.remove('active');
+            }
+            document.getElementById(gameId).classList.add('active');
+            activeGameId = gameId;
+
+            document.querySelectorAll('.game-nav-button').forEach(button => {
+                button.classList.remove('bg-blue-500', 'text-white');
+                button.classList.add('bg-gray-300', 'text-gray-700');
+            });
+            event.target.classList.add('bg-blue-500', 'text-white');
+            event.target.classList.remove('bg-gray-300', 'text-gray-700');
+            
+            if (gameId === 'game1') setupGame1();
+            if (gameId === 'game2') setupGame2();
+            if (gameId === 'game3') setupGame3();
+            if (gameId === 'game4') setupGame4();
+            if (gameId === 'game5') setupGame5();
+            if (gameId === 'game6') setupGame6();
+            if (gameId === 'game7') setupGame7();
+            if (gameId === 'game8') setupGame8();
+            if (gameId === 'game9') setupGame9();
+            if (gameId === 'game10') setupGame10();
+        }
+        
+        function showFeedback(id, message, isSuccess) {
+            const feedbackEl = document.getElementById(id);
+            feedbackEl.textContent = message;
+            feedbackEl.className = 'feedback show ' + (isSuccess ? 'success' : 'error');
+            speak(message);
+            setTimeout(() => { feedbackEl.classList.remove('show'); }, 2000);
+        }
+
+        function setupDragAndDrop() {
+            document.addEventListener('dragstart', (e) => {
+                if (e.target.classList.contains('draggable')) {
+                    draggedItem = e.target;
+                    setTimeout(() => e.target.classList.add('dragging'), 0);
+                }
+            });
+            document.addEventListener('dragend', (e) => {
+                if (draggedItem) { draggedItem.classList.remove('dragging'); draggedItem = null; }
+            });
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('hovered'); });
+                zone.addEventListener('dragleave', (e) => { zone.classList.remove('hovered'); });
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('hovered');
+                    if (draggedItem) handleDrop(draggedItem, zone);
+                });
+            });
+        }
+        
+        function handleDrop(item, zone) {
+            if (activeGameId === 'game1') handleG1Drop(item, zone);
+            if (activeGameId === 'game5') handleG5Drop(item, zone);
+            if (activeGameId === 'game10') handleG10Drop(item, zone);
+        }
+        
+        // --- PERMAINAN 1: SORTIR AJAIB ---
+        function setupGame1() {
+            const itemsContainer = document.getElementById('g1-items');
+            itemsContainer.innerHTML = '';
+            const items = [ { shape: 'circle', color: 'red' }, { shape: 'square', color: 'blue' }, { shape: 'square', color: 'red' }, { shape: 'circle', color: 'blue' }, { shape: 'triangle', color: 'red' }, { shape: 'triangle', color: 'blue' } ];
+            items.sort(() => Math.random() - 0.5).forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'draggable w-16 h-16';
+                div.draggable = true;
+                div.dataset.color = item.color;
+                if (item.shape === 'circle') { div.style.backgroundColor = item.color; div.style.borderRadius = '50%';
+                } else if (item.shape === 'square') { div.style.backgroundColor = item.color;
+                } else if (item.shape === 'triangle') {
+                    div.style.width = '0'; div.style.height = '0';
+                    div.style.borderLeft = '32px solid transparent'; div.style.borderRight = '32px solid transparent';
+                    div.style.borderBottom = `64px solid ${item.color}`; div.style.backgroundColor = 'transparent';
+                }
+                itemsContainer.appendChild(div);
+            });
+            document.getElementById('g1-feedback').classList.remove('show');
+        }
+        function handleG1Drop(item, zone) {
+            if (item.dataset.color === zone.dataset.target) {
+                item.remove();
+                showFeedback('g1-feedback', 'Benar! Hebat!', true);
+                if (document.getElementById('g1-items').children.length === 0) {
+                    showFeedback('g1-feedback', 'Hore! Semua berhasil disortir!', true);
+                }
+            } else {
+                showFeedback('g1-feedback', 'Ups, coba lagi! Keranjang yang salah.', false);
+            }
+        }
+
+        // --- PERMAINAN 2: RONCE POLA ---
+        let g2_pattern = [], g2_currentIndex = 0;
+        const g2_colors = ['#ef4444', '#3b82f6', '#facc15', '#22c55e'];
+        function setupGame2() {
+            const patternType = Math.floor(Math.random() * 3);
+            const baseColors = [...g2_colors].sort(() => 0.5 - Math.random());
+            if (patternType === 0) g2_pattern = [baseColors[0], baseColors[1], baseColors[0], baseColors[1], baseColors[0], baseColors[1]];
+            else if (patternType === 1) g2_pattern = [baseColors[0], baseColors[0], baseColors[1], baseColors[1], baseColors[0], baseColors[0]];
+            else g2_pattern = [baseColors[0], baseColors[1], baseColors[2], baseColors[0], baseColors[1], baseColors[2]];
+            g2_currentIndex = 3;
+            renderGame2();
+        }
+        function renderGame2() {
+            const patternContainer = document.getElementById('g2-pattern');
+            patternContainer.innerHTML = '';
+            for (let i = 0; i < g2_currentIndex; i++) {
+                const bead = document.createElement('div');
+                bead.className = 'w-12 h-12 rounded-full';
+                bead.style.backgroundColor = g2_pattern[i];
+                patternContainer.appendChild(bead);
+            }
+            const choicesContainer = document.getElementById('g2-choices');
+            choicesContainer.innerHTML = '';
+            [...new Set(g2_pattern)].sort(() => 0.5 - Math.random()).forEach(color => {
+                const choice = document.createElement('button');
+                choice.className = 'w-14 h-14 rounded-full shadow-md hover:scale-110 transition';
+                choice.style.backgroundColor = color;
+                choice.onclick = () => checkG2Answer(color);
+                choicesContainer.appendChild(choice);
+            });
+            document.getElementById('g2-feedback').classList.remove('show');
+        }
+        function checkG2Answer(chosenColor) {
+            if (g2_currentIndex < g2_pattern.length && chosenColor === g2_pattern[g2_currentIndex]) {
+                g2_currentIndex++;
+                showFeedback('g2-feedback', 'Betul! Lanjutkan polanya!', true);
+                renderGame2();
+                if (g2_currentIndex === g2_pattern.length) {
+                    showFeedback('g2-feedback', 'Pola Selesai! Kamu Hebat!', true);
+                }
+            } else {
+                showFeedback('g2-feedback', 'Bukan yang itu, coba warna lain!', false);
+            }
+        }
+        
+        // --- PERMAINAN 3: TEKA-TEKI BAYANGAN ---
+        const g3_shapes = [ { id: 'star', color: '#facc15', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>' }, { id: 'heart', color: '#ef4444', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' }, { id: 'cloud', color: '#60a5fa', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>' } ];
+        let g3_selectedItem = null;
+        function setupGame3() {
+            g3_selectedItem = null;
+            const itemsContainer = document.getElementById('g3-items');
+            const shadowsContainer = document.getElementById('g3-shadows');
+            itemsContainer.innerHTML = ''; shadowsContainer.innerHTML = '';
+            const shuffledShapes = [...g3_shapes].sort(() => 0.5 - Math.random());
+            const shuffledShadows = [...g3_shapes].sort(() => 0.5 - Math.random());
+            shuffledShapes.forEach(shape => {
+                const item = document.createElement('div');
+                item.className = 'g3-item w-24 h-24 p-2'; item.style.color = shape.color;
+                item.innerHTML = shape.svg; item.dataset.shapeId = shape.id;
+                item.onclick = handleG3ItemClick; itemsContainer.appendChild(item);
+            });
+            shuffledShadows.forEach(shape => {
+                const shadow = document.createElement('div');
+                shadow.className = 'g3-shadow w-24 h-24 p-2 text-gray-800';
+                shadow.innerHTML = shape.svg; shadow.dataset.shapeId = shape.id;
+                shadow.onclick = handleG3ShadowClick; shadowsContainer.appendChild(shadow);
+            });
+            document.getElementById('g3-feedback').classList.remove('show');
+        }
+        function handleG3ItemClick(event) {
+            const clickedItem = event.currentTarget;
+            if (clickedItem.classList.contains('matched')) return;
+            if (g3_selectedItem) g3_selectedItem.classList.remove('selected');
+            g3_selectedItem = clickedItem;
+            g3_selectedItem.classList.add('selected');
+        }
+        function handleG3ShadowClick(event) {
+            const clickedShadow = event.currentTarget;
+            if (!g3_selectedItem || clickedShadow.classList.contains('matched')) return;
+            if (g3_selectedItem.dataset.shapeId === clickedShadow.dataset.shapeId) {
+                clickedShadow.style.color = g3_selectedItem.style.color;
+                clickedShadow.classList.add('matched'); g3_selectedItem.classList.add('matched');
+                g3_selectedItem.style.opacity = '0.3'; g3_selectedItem.classList.remove('selected');
+                g3_selectedItem = null;
+                showFeedback('g3-feedback', 'Cocok! Hebat!', true);
+                if (document.querySelectorAll('.g3-item:not(.matched)').length === 0) {
+                     showFeedback('g3-feedback', 'Hore! Semua bayangan ditemukan!', true);
+                }
+            } else {
+                showFeedback('g3-feedback', 'Bukan bayangan yang itu, coba lagi!', false);
+                g3_selectedItem.classList.remove('selected');
+                g3_selectedItem = null;
+            }
+        }
+        
+        // --- PERMAINAN 4: SIAPAKAH AKU? ---
+        const g4_questions = [ { clue: "Aku punya belalai panjang dan telinga lebar. Siapakah aku?", answer: "gajah", choices: ["gajah", "singa", "monyet"] }, { clue: "Aku adalah raja hutan dengan rambut tebal. Siapakah aku?", answer: "singa", choices: ["harimau", "singa", "kucing"] }, { clue: "Aku suka makan pisang dan bergelantungan di pohon. Siapakah aku?", answer: "monyet", choices: ["burung", "ular", "monyet"] } ];
+        let g4_currentQuestionIndex = 0;
+        function setupGame4() {
+            g4_currentQuestionIndex = Math.floor(Math.random() * g4_questions.length);
+            renderGame4();
+        }
+        function renderGame4() {
+            const question = g4_questions[g4_currentQuestionIndex];
+            document.getElementById('g4-clue').textContent = question.clue;
+            const choicesContainer = document.getElementById('g4-choices');
+            choicesContainer.innerHTML = '';
+            question.choices.sort(() => 0.5 - Math.random()).forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'p-4 bg-gray-100 rounded-lg shadow hover:bg-yellow-200 transition';
+                button.innerHTML = `<img src="https://placehold.co/150x150/f0f0f0/333?text=${choice.toUpperCase()}" alt="${choice}" class="w-full h-auto rounded-md object-cover"><p class="mt-2 font-semibold">${choice}</p>`;
+                button.onclick = () => checkG4Answer(choice);
+                choicesContainer.appendChild(button);
+            });
+            document.getElementById('g4-feedback').classList.remove('show');
+        }
+        function checkG4Answer(chosenAnswer) {
+            const correctAnswer = g4_questions[g4_currentQuestionIndex].answer;
+            if (chosenAnswer === correctAnswer) showFeedback('g4-feedback', `Benar sekali! Itu adalah ${correctAnswer}!`, true);
+            else showFeedback('g4-feedback', 'Jawaban kurang tepat, coba lagi nanti!', false);
+        }
+        
+        // --- PERMAINAN 5: KOTAK AJAIB (REPLACED) ---
+        const g5_emojis = ['🍎', '🍌', '🌟'];
+        let g5_solution;
+        function setupGame5() {
+            const gridEl = document.getElementById('g5-grid');
+            const choicesEl = document.getElementById('g5-choices');
+            gridEl.innerHTML = '';
+            choicesEl.innerHTML = '';
+            document.getElementById('g5-feedback').classList.remove('show');
+            const base = g5_emojis.slice().sort(() => 0.5 - Math.random());
+            g5_solution = [ [base[0], base[1], base[2]], [base[1], base[2], base[0]], [base[2], base[0], base[1]] ];
+            const puzzle = g5_solution.map(row => row.slice());
+            let removedCount = 0;
+            while(removedCount < 4) {
+                const r = Math.floor(Math.random()*3);
+                const c = Math.floor(Math.random()*3);
+                if(puzzle[r][c] !== null) { puzzle[r][c] = null; removedCount++; }
+            }
+            for(let r=0; r<3; r++){
+                for(let c=0; c<3; c++){
+                    const cell = document.createElement('div');
+                    cell.className = 'w-24 h-24 bg-white flex justify-center items-center text-5xl';
+                    cell.dataset.r = r; cell.dataset.c = c;
+                    if(puzzle[r][c]) { cell.textContent = puzzle[r][c]; } 
+                    else { cell.classList.add('drop-zone'); }
+                    gridEl.appendChild(cell);
+                }
+            }
+            g5_emojis.forEach(emoji => {
+                const choice = document.createElement('div');
+                choice.className = 'draggable w-20 h-20 bg-gray-200 rounded-lg flex justify-center items-center text-5xl';
+                choice.textContent = emoji;
+                choice.draggable = true;
+                choicesEl.appendChild(choice);
+            });
+        }
+        function handleG5Drop(item, zone) {
+            if (zone.children.length > 0) { zone.innerHTML = ''; }
+            const newItem = item.cloneNode(true);
+            newItem.classList.remove('draggable', 'dragging');
+            zone.appendChild(newItem);
+        }
+        function checkGame5() {
+            let isCorrect = true;
+            for(let r=0; r<3; r++){
+                for(let c=0; c<3; c++){
+                    const cell = document.querySelector(`#g5-grid > [data-r='${r}'][data-c='${c}']`);
+                    const content = cell.textContent.trim();
+                    if(content.length === 0 || content !== g5_solution[r][c]){ isCorrect = false; break; }
+                }
+                if(!isCorrect) break;
+            }
+            if(isCorrect) showFeedback('g5-feedback', 'Hore! Semua kotak terisi dengan benar!', true);
+            else showFeedback('g5-feedback', 'Masih ada yang salah, coba periksa lagi!', false);
+        }
+
+        // --- PERMAINAN 6: JEJAK HARTA KARUN (REVISED) ---
+        let g6_path, g6_playerPos, g6_pathIndex;
+        function setupGame6() {
+            const grid = document.getElementById('g6-grid');
+            grid.innerHTML = '';
+            g6_path = [{r:4, c:0}, {r:3, c:0}, {r:2, c:0}, {r:2, c:1}, {r:2, c:2}, {r:1, c:2}, {r:0, c:2}, {r:0, c:3}, {r:0, c:4}];
+            g6_playerPos = {...g6_path[0]};
+            g6_pathIndex = 0;
+            for(let r=0; r<5; r++){
+                for(let c=0; c<5; c++){
+                    const cell = document.createElement('div');
+                    cell.className = 'w-12 h-12 md:w-16 md:h-16 flex justify-center items-center text-4xl';
+                    const isPath = g6_path.some(p => p.r === r && p.c === c);
+                    cell.textContent = isPath ? '🟩' : '🌳';
+                    if(r === g6_playerPos.r && c === g6_playerPos.c) cell.textContent = '👧';
+                    if(r === g6_path[g6_path.length-1].r && c === g6_path[g6_path.length-1].c) cell.textContent = '🎁';
+                    cell.dataset.r = r; cell.dataset.c = c;
+                    grid.appendChild(cell);
+                }
+            }
+            document.getElementById('g6-feedback').classList.remove('show');
+        }
+        function handleG6ArrowClick(direction) {
+            if(g6_pathIndex >= g6_path.length - 1) return;
+            const nextPos = g6_path[g6_pathIndex + 1];
+            let attemptedPos = {...g6_playerPos};
+            if (direction === 'up') attemptedPos.r--;
+            if (direction === 'down') attemptedPos.r++;
+            if (direction === 'left') attemptedPos.c--;
+            if (direction === 'right') attemptedPos.c++;
+            if(attemptedPos.r === nextPos.r && attemptedPos.c === nextPos.c) {
+                const oldCell = document.querySelector(`[data-r="${g6_playerPos.r}"][data-c="${g6_playerPos.c}"]`);
+                oldCell.textContent = '🟩';
+                g6_playerPos = attemptedPos;
+                g6_pathIndex++;
+                const newCell = document.querySelector(`[data-r="${g6_playerPos.r}"][data-c="${g6_playerPos.c}"]`);
+                newCell.textContent = '👧';
+                if(g6_pathIndex === g6_path.length - 1) {
+                    showFeedback('g6-feedback', 'Hore! Sampai di harta karun!', true);
+                    newCell.textContent = '🏆';
+                } else {
+                    showFeedback('g6-feedback', 'Langkah yang benar!', true);
+                }
+            } else {
+                showFeedback('g6-feedback', 'Arah yang salah, coba lagi!', false);
+            }
+        }
+        
+        // --- PERMAINAN 7: MANA YANG BERBEDA? ---
+        const g7_sets = [ { items: ['🍎','🍎','🍌','🍎'], odd: '🍌' }, { items: ['🚗','🚌','🚗','🚗'], odd: '🚌' }, { items: ['🌞','🌞','🌞','🌙'], odd: '🌙' } ];
+        function setupGame7() {
+            const choicesContainer = document.getElementById('g7-choices');
+            choicesContainer.innerHTML = '';
+            const currentSet = g7_sets[Math.floor(Math.random() * g7_sets.length)];
+            currentSet.items.sort(() => 0.5 - Math.random()).forEach(item => {
+                const choice = document.createElement('button');
+                choice.className = 'text-6xl bg-gray-100 rounded-lg shadow p-4 hover:bg-yellow-200 transition';
+                choice.textContent = item;
+                choice.onclick = () => checkG7Answer(item === currentSet.odd);
+                choicesContainer.appendChild(choice);
+            });
+            document.getElementById('g7-feedback').classList.remove('show');
+        }
+        function checkG7Answer(isCorrect) {
+            if(isCorrect) showFeedback('g7-feedback', 'Benar! Kamu jeli sekali!', true);
+            else showFeedback('g7-feedback', 'Bukan yang itu, coba perhatikan lagi.', false);
+        }
+
+        // --- PERMAINAN 8: MEMBANGUN MENARA ---
+        let g8_rules, g8_towerBlocks;
+        const g8_colors = { red: '#ef4444', blue: '#3b82f6', green: '#22c55e' };
+        function setupGame8() {
+            g8_rules = ['red', 'green', 'blue'].sort(() => 0.5 - Math.random());
+            g8_towerBlocks = [];
+            const rulesEl = document.querySelector('#g8-rules ul');
+            rulesEl.innerHTML = `<li>Bawah: ${g8_rules[0]}</li><li>Tengah: ${g8_rules[1]}</li><li>Atas: ${g8_rules[2]}</li>`;
+            const choicesEl = document.getElementById('g8-choices');
+            choicesEl.innerHTML = '';
+            Object.keys(g8_colors).forEach(color => {
+                const block = document.createElement('button');
+                block.className = 'w-12 h-12 rounded shadow hover:scale-110 transition';
+                block.style.backgroundColor = g8_colors[color];
+                block.onclick = () => handleG8BlockClick(color);
+                choicesEl.appendChild(block);
+            });
+            renderG8Tower();
+            document.getElementById('g8-feedback').classList.remove('show');
+        }
+        function handleG8BlockClick(color) {
+            if (g8_towerBlocks.length < 3 && g8_rules[g8_towerBlocks.length] === color) {
+                g8_towerBlocks.push(color);
+                renderG8Tower();
+                if (g8_towerBlocks.length === 3) {
+                    showFeedback('g8-feedback', 'Menara Selesai! Sesuai aturan!', true);
+                } else {
+                    showFeedback('g8-feedback', 'Benar! Lanjutkan!', true);
+                }
+            } else {
+                showFeedback('g8-feedback', 'Ups, bukan warna itu selanjutnya!', false);
+            }
+        }
+        function renderG8Tower() {
+            const towerEl = document.getElementById('g8-tower');
+            towerEl.innerHTML = '';
+            g8_towerBlocks.forEach(color => {
+                const div = document.createElement('div');
+                div.className = 'w-full h-1/3';
+                div.style.backgroundColor = g8_colors[color];
+                towerEl.appendChild(div);
+            });
+        }
+        
+        // --- PERMAINAN 9: DOMINO RAKSASA ---
+        function setupGame9() {
+            const area = document.getElementById('g9-domino-area');
+            area.innerHTML = '';
+            for(let i=0; i<8; i++) {
+                const domino = document.createElement('div');
+                domino.className = 'domino';
+                domino.id = `domino-${i}`;
+                area.appendChild(domino);
+            }
+            document.getElementById('g9-feedback').classList.remove('show');
+        }
+        function triggerG9Fall() {
+            for(let i=0; i<8; i++) {
+                setTimeout(() => {
+                    document.getElementById(`domino-${i}`).classList.add('fall');
+                }, i * 100);
+            }
+        }
+
+        // --- PERMAINAN 10: JEMBATAN UNTUK HEWAN ---
+        function setupGame10() {
+            const choicesEl = document.getElementById('g10-choices');
+            choicesEl.innerHTML = '';
+            const sizes = [ { size: 'small', width: 'w-32', correct: false }, { size: 'medium', width: 'w-48', correct: true }, { size: 'large', width: 'w-64', correct: false }, ];
+            sizes.sort(() => 0.5 - Math.random()).forEach(s => {
+                const bridge = document.createElement('div');
+                bridge.className = `draggable ${s.width} h-8 bg-yellow-600 border-4 border-yellow-800 rounded-lg shadow-lg`;
+                bridge.draggable = true;
+                bridge.dataset.correct = s.correct;
+                choicesEl.appendChild(bridge);
+            });
+            const gap = document.getElementById('g10-gap');
+            gap.innerHTML = '';
+            gap.className = 'drop-zone w-48 h-16 bg-blue-300 border-4 border-dashed border-blue-400';
+            document.getElementById('g10-feedback').classList.remove('show');
+        }
+        function handleG10Drop(item, zone) {
+            if(item.dataset.correct === 'true') {
+                zone.innerHTML = '';
+                zone.appendChild(item);
+                zone.className = 'w-48 h-16 flex items-center justify-center';
+                item.classList.remove('draggable');
+                showFeedback('g10-feedback', 'Pas! Hewan bisa menyeberang!', true);
+            } else {
+                showFeedback('g10-feedback', 'Jembatan ini tidak pas, coba yang lain!', false);
+            }
+        }
+
+        // Inisialisasi awal
+        document.addEventListener('DOMContentLoaded', () => {
+           setupGame1();
+           setupDragAndDrop();
+           // Mengaktifkan konteks audio pada interaksi pertama pengguna
+           document.body.addEventListener('click', () => synth.resume(), { once: true });
+        });
+
+    </script>
+</body>
+</html>
+
