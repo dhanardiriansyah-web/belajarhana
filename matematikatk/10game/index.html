@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10 Permainan Berhitung TK</title>
+    <style>
+        /* CSS Reset Sederhana */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+            background-color: #f0f8ff; /* Biru langit muda */
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-weight: bold; /* Teks lebih tebal/chunky */
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto; /* Margin lebih besar */
+            padding: 20px; /* Padding lebih besar */
+            background-color: #fff;
+            border-radius: 20px; /* Sudut lebih bulat */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 3px dashed #4682b4; /* Steel Blue */
+            margin-bottom: 15px;
+        }
+
+        header h1 {
+            color: #4682b4;
+            font-size: 2.5rem; /* Sedikit lebih besar */
+        }
+
+        /* Navigasi Pilihan Game */
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .game-btn {
+            background-color: #00bfff; /* Deep Sky Blue - Lebih cerah */
+            color: white;
+            border: none;
+            padding: 15px 12px; /* Padding lebih besar */
+            border-radius: 12px; /* Lebih bulat */
+            cursor: pointer;
+            font-size: 1.1rem; /* Lebih besar */
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Efek 3D */
+            line-height: 1.3;
+        }
+
+        .game-btn:hover {
+            background-color: #009acd; /* Biru lebih gelap saat hover */
+            transform: translateY(-3px) scale(1.03); /* Efek "pop" */
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+
+        .game-btn.active {
+            background-color: #ff4500; /* OrangeRed - Kontras tinggi */
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+        }
+
+        /* Area Permainan */
+        #game-description {
+            background-color: #fffacd; /* Lemon Chiffon */
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 3px dotted #f0e68c; /* Border lebih ramah */
+        }
+
+        #game-description h3 {
+            color: #b8860b; /* Dark Goldenrod */
+            margin-bottom: 5px;
+            font-size: 1.5rem; /* Lebih besar */
+            display: flex; /* BARU: Untuk menyejajarkan tombol */
+            align-items: center; /* BARU */
+        }
+
+        /* BARU: Tombol Suara Instruksi */
+        .speak-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-left: 10px;
+            padding: 5px;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+        .speak-btn:hover {
+            transform: scale(1.2);
+        }
+
+        #game-area {
+            min-height: 300px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #fdfdfd;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Tombol Aksi dalam Game */
+        .action-btn {
+            background-color: #32cd32; /* Lime Green */
+            color: white;
+            border: none;
+            padding: 12px 22px; /* Padding lebih besar */
+            font-size: 1.3rem; /* Font lebih besar */
+            font-weight: bold;
+            border-radius: 12px; /* Lebih bulat */
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .action-btn:hover {
+            background-color: #228b22; /* Forest Green */
+            transform: translateY(-2px);
+        }
+
+        .clear-btn {
+            background-color: #ffa500; /* Orange */
+        }
+        .clear-btn:hover {
+            background-color: #e69500;
+        }
+
+        /* Input Angka */
+        .number-input {
+            width: 100px; /* Lebih lebar */
+            padding: 12px;
+            font-size: 2rem; /* Jauh lebih besar */
+            text-align: center;
+            border: 3px solid #ccc; /* Border lebih tebal */
+            border-radius: 12px; /* Lebih bulat */
+            margin: 10px;
+        }
+
+        #feedback {
+            font-size: 1.5rem; /* Lebih besar */
+            font-weight: bold;
+            margin-top: 15px;
+            height: 35px; /* Lebih tinggi */
+        }
+        
+        .correct { color: #228b22; }
+        .incorrect { color: #dc143c; }
+
+        /* --- STYLES PERMAINAN --- */
+
+        /* Game 1 & 2: Papan Angka 100 */
+        .number-chart {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px; /* Jarak antar sel lebih besar */
+            width: 100%;
+            max-width: 500px; /* Disesuaikan untuk sel lebih besar */
+        }
+        .number-cell {
+            width: 42px; /* Lebih besar */
+            height: 42px; /* Lebih besar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e0f7fa;
+            border: 1px solid #b2ebf2;
+            border-radius: 8px; /* Lebih bulat */
+            font-weight: bold;
+            font-size: 1.1rem; /* Font di dalam sel lebih besar */
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .number-cell:hover {
+            background-color: #80deea;
+        }
+        .number-cell.highlight-one {
+            background-color: #ffeb3b; /* Kuning */
+            transform: scale(1.1);
+        }
+        .number-cell.highlight-ten {
+            background-color: #ff9800; /* Oranye */
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Game 4, 6, 8: Ten Frame */
+        .ten-frame-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .ten-frame {
+            display: grid;
+            grid-template-columns: repeat(5, 55px); /* Slot lebih besar */
+            grid-template-rows: repeat(2, 55px); /* Slot lebih besar */
+            gap: 6px;
+            border: 4px solid #333; /* Border lebih tebal */
+            padding: 8px;
+            background-color: #fff;
+            border-radius: 8px;
+        }
+        .ten-frame-slot {
+            width: 55px; /* Disesuaikan */
+            height: 55px; /* Disesuaikan */
+            border: 3px solid #ccc; /* Border lebih tebal */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .ten-frame-dot {
+            width: 45px; /* Titik lebih besar */
+            height: 45px; /* Titik lebih besar */
+            background-color: #e53935; /* Merah */
+            border-radius: 50%;
+        }
+
+        /* Game 5 & 7: Benda-benda */
+        .object-container {
+            width: 100%;
+            min-height: 200px;
+            position: relative;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .game-object {
+            font-size: 2.5rem;
+            position: absolute;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        /* Game 7: Kotak Benda */
+        #object-box {
+            width: 100%;
+            min-height: 100px;
+            background-color: #f5f5f5;
+            border: 2px solid #a1887f; /* Coklat muda */
+            border-radius: 8px;
+            margin-top: 10px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-content: flex-start;
+        }
+        .collected-object {
+            font-size: 1.5rem;
+        }
+
+        /* Game 8 & 9: Perbandingan */
+        .comparison-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .compare-box {
+            font-size: 4rem;
+            font-weight: bold;
+            padding: 20px;
+            min-width: 100px;
+            text-align: center;
+        }
+        .compare-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .compare-btn {
+            font-size: 2rem;
+            width: 60px;
+            height: 60px;
+            font-weight: bold;
+        }
+
+        /* Game 10: Menulis Angka */
+        #drawing-canvas {
+            border: 4px solid #333; /* Border lebih tebal */
+            background-color: #ffffff;
+            border-radius: 12px;
+            cursor: crosshair;
+        }
+        #ghost-number {
+            position: absolute;
+            font-size: 300px; /* Jauh lebih besar */
+            color: #e0e0e0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            user-select: none;
+        }
+        #canvas-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .num-btn {
+            width: 50px; /* Tombol angka lebih besar */
+            height: 50px; /* Tombol angka lebih besar */
+            font-size: 1.5rem; /* Font di tombol lebih besar */
+            background-color: #89cff0; /* Baby Blue */
+            border: none;
+            border-radius: 10px; /* Lebih bulat */
+            cursor: pointer;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+        }
+        .num-btn:hover { background-color: #7abde0; transform: translateY(-2px); }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Pusat Permainan Berhitung TK 🎨</h1>
+        </header>
+
+        <!-- Navigasi Pilihan Game -->
+        <nav id="game-selection">
+            <button class="game-btn" data-game="1">1. Papan 1-100 💯</button>
+            <button class="game-btn" data-game="2">2. Hitung per 10 🔟</button>
+            <button class="game-btn" data-game="3">3. Lanjutkan Hitungan ➡️</button>
+            <button class="game-btn" data-game="4">4. Isi Ten Frame 🖼️</button>
+            <button class="game-btn" data-game="5">5. Hitung Benda 🍎</button>
+            <button class="game-btn" data-game="6">6. Satu Lebih Banyak ➕</button>
+            <button class="game-btn" data-game="7">7. Ambil Benda 🌼</button>
+            <button class="game-btn" data-game="8">8. Bandingkan Kelompok ><</button>
+            <button class="game-btn" data-game="9">9. Bandingkan Angka 🔢</button>
+            <button class="game-btn" data-game="10">10. Tulis Angka ✍️</button>
+        </nav>
+
+        <!-- Deskripsi Permainan -->
+        <div id="game-description">
+            <h3>Selamat Datang! 👋</h3>
+            <p>Pilih salah satu permainan di atas untuk mulai belajar berhitung. (Jenjang: TK / PAUD)</p>
+        </div>
+
+        <!-- Area Permainan Utama -->
+        <div id="game-area">
+            <p>Silakan pilih permainan...</p>
+        </div>
+
+        <!-- Feedback -->
+        <div id="feedback" style="text-align: center;"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameSelection = document.getElementById('game-selection');
+            const gameArea = document.getElementById('game-area');
+            const gameDescription = document.getElementById('game-description');
+            const feedbackEl = document.getElementById('feedback');
+            
+            // --- BARU: Speech Synthesis (Suara Instruksi) ---
+            const synth = window.speechSynthesis;
+            let indonesianVoice = null;
+
+            function loadVoices() {
+                if (indonesianVoice) return; // Sudah dimuat
+                const voices = synth.getVoices();
+                indonesianVoice = voices.find(voice => voice.lang === 'id-ID' || voice.lang === 'id_ID');
+                
+                if (!indonesianVoice) {
+                    // Fallback jika tidak ada id-ID
+                    indonesianVoice = voices.find(voice => voice.lang.startsWith('id'));
+                }
+                
+                if(!indonesianVoice) {
+                    console.warn("Tidak menemukan suara (id-ID). Fitur suara instruksi mungkin tidak berfungsi.");
+                }
+            }
+            
+            // Panggil sekali untuk mencoba memuat
+            loadVoices();
+            // Panggil lagi jika suara berubah/dimuat (penting untuk beberapa browser)
+            if (synth.onvoiceschanged !== undefined) {
+                synth.onvoiceschanged = loadVoices;
+            }
+
+            /**
+             * Membacakan teks menggunakan suara Indonesia
+             * @param {string} text - Teks yang ingin dibacakan
+             */
+            function speak(text) {
+                // Pastikan suara sudah dimuat
+                if (!indonesianVoice) {
+                    loadVoices(); // Coba muat lagi
+                    if (!indonesianVoice) {
+                        console.warn("Tidak ada suara id-ID, tidak dapat memutar instruksi.");
+                        // Beri tahu pengguna
+                        showFeedback("Audio instruksi tidak tersedia", false);
+                        playSound('triangle', 0.1, 150); // Suara error rendah
+                        return;
+                    }
+                }
+                
+                if (synth.speaking) {
+                    synth.cancel(); // Hentikan suara sebelumnya jika ada
+                }
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.voice = indonesianVoice;
+                utterance.lang = 'id-ID';
+                utterance.pitch = 1;
+                utterance.rate = 0.9; // Sedikit lebih lambat untuk anak-anak
+                synth.speak(utterance);
+            }
+            
+            // Tambahkan event listener ke gameDescription untuk menangani klik tombol 🔊
+            gameDescription.addEventListener('click', (e) => {
+                if (e.target.classList.contains('speak-btn')) {
+                    playClickSound(); // Mainkan suara klik
+                    
+                    // Ambil semua elemen <p> di dalam gameDescription
+                    const paragraphs = gameDescription.querySelectorAll('p');
+                    // Gabungkan teksnya
+                    const textToSpeak = Array.from(paragraphs)
+                                         .map(p => p.textContent)
+                                         .join('. '); // Gabung dengan titik
+                                         
+                    speak(textToSpeak);
+                }
+            });
+            // --- AKHIR BARU ---
+
+            // --- BARU: Audio Context ---
+            let audioCtx;
+            function initAudio() {
+                // Buat AudioContext saat ada interaksi pertama (klik atau sentuh)
+                // Ini adalah kebijakan browser modern untuk audio
+                if (!audioCtx) {
+                    try {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.warn("Web Audio API tidak didukung di browser ini");
+                    }
+                }
+            }
+            // Tambahkan event listener untuk menginisialisasi audio saat ada interaksi
+            document.body.addEventListener('click', initAudio, { once: true });
+            document.body.addEventListener('touchstart', initAudio, { once: true });
+
+            /**
+             * Memainkan suara sederhana menggunakan Web Audio API
+             * @param {string} type - Tipe gelombang: 'sine', 'square', 'sawtooth', 'triangle'
+             * @param {number} duration - Durasi dalam detik
+             * @param {number} frequency - Frekuensi nada (Hz)
+             * @param {number} [endFrequency] - Opsional: Frekuensi akhir untuk nada naik/turun
+             */
+            function playSound(type, duration, frequency, endFrequency) {
+                if (!audioCtx) return; // Audio belum siap
+
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.type = type;
+                
+                if (endFrequency) {
+                    // Untuk nada naik/turun
+                    oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+                    oscillator.frequency.linearRampToValueAtTime(endFrequency, audioCtx.currentTime + duration);
+                } else {
+                    oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+                }
+
+                // Volume (0.5 agar tidak terlalu keras)
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                // Efek fade out agar tidak "pop"
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + duration);
+            }
+
+            function playClickSound() {
+                // Suara klik singkat
+                playSound('triangle', 0.05, 440);
+            }
+
+            function playCorrectSound() {
+                // Nada naik (C5 -> G5)
+                playSound('sine', 0.1, 523);
+                setTimeout(() => playSound('sine', 0.1, 783), 100);
+            }
+
+            function playIncorrectSound() {
+                // Nada "buzz" rendah
+                playSound('sawtooth', 0.15, 164, 100);
+            }
+            // --- AKHIR BARU ---
+
+            let activeGameBtn = null;
+            let currentNumberChart = []; // Untuk menyimpan sel papan 100
+
+            // Penjaga Acara Utama untuk Tombol Game
+            gameSelection.addEventListener('click', (e) => {
+                if (e.target.classList.contains('game-btn')) {
+                    // --- BARU ---
+                    playClickSound();
+                    // --- AKHIR BARU ---
+                    
+                    const gameId = e.target.dataset.game;
+                    
+                    // Reset tombol aktif sebelumnya
+                    if (activeGameBtn) {
+                        activeGameBtn.classList.remove('active');
+                    }
+                    // Atur tombol aktif baru
+                    activeGameBtn = e.target;
+                    activeGameBtn.classList.add('active');
+                    
+                    loadGame(gameId);
+                }
+            });
+
+            // Fungsi untuk membersihkan area
+            function clearGameArea() {
+                gameArea.innerHTML = '';
+                feedbackEl.innerHTML = '';
+            }
+
+            // Fungsi untuk menampilkan feedback
+            function showFeedback(message, isCorrect) {
+                feedbackEl.textContent = message;
+                feedbackEl.className = isCorrect ? 'correct' : 'incorrect';
+                
+                // --- BARU: Mainkan Suara ---
+                if (isCorrect) {
+                    playCorrectSound();
+                } else {
+                    playIncorrectSound();
+                }
+                // --- AKHIR BARU ---
+                
+                setTimeout(() => { feedbackEl.innerHTML = ''; }, 2000);
+            }
+
+            // Fungsi untuk angka acak
+            function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            // Fungsi Pemuat Game Utama
+            function loadGame(gameId) {
+                clearGameArea();
+                currentNumberChart = []; // Bersihkan referensi papan
+
+                switch (gameId) {
+                    case '1': initGame1(); break;
+                    case '2': initGame2(); break;
+                    case '3': initGame3(); break;
+                    case '4': initGame4(); break;
+                    case '5': initGame5(); break;
+                    case '6': initGame6(); break;
+                    case '7': initGame7(); break;
+                    case '8': initGame8(); break;
+                    case '9': initGame9(); break;
+                    case '10': initGame10(); break;
+                }
+            }
+            
+            // --- FUNGSI INIT PERMAINAN ---
+
+            // Game 1: Papan 1-100 (K.CC.A.1)
+            function initGame1() {
+                gameDescription.innerHTML = `
+                    <h3>1. Papan 1-100 <button class="speak-btn" aria-label="Dengarkan Instruksi">🔊</button></h3>
+                    <p><strong>Tujuan:</strong> Mengenal urutan angka 1-100 (K.CC.A.1).</p>
+                    <p><strong>Cara Bermain:</strong> Klik angka-angka secara berurutan untuk menghitung dari 1 sampai 100. Tombol "Reset" akan membersihkan papan.</p>
+                `;
+                
+                const chart = document.createElement('div');
+                chart.className = 'number-chart';
+                let lastClicked = 0;
+                
+                for (let i = 1; i <= 100; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'number-cell';
+                    cell.textContent = i;
+                    cell.dataset.num = i;
+                    
+                    cell.addEventListener('click', () => {
+                        const num = parseInt(cell.dataset.num);
+                        if (num === lastClicked + 1) {
+                            // --- BARU ---
+                            // Nada naik sedikit setiap klik
+                            playSound('sine', 0.05, 300 + num * 2);
+                            // --- AKHIR BARU ---
+                            cell.classList.add('highlight-one');
+                            lastClicked = num;
+                            if (num === 100) {
+                                showFeedback('Hebat! Kamu berhasil hitung sampai 100!', true);
+                            }
+                        } else {
+                            showFeedback('Ups, coba klik angka setelah ' + lastClicked, false);
+                        }
+                    });
+                    chart.appendChild(cell);
+                }
+                gameArea.appendChild(chart);
+                
+                const resetBtn = document.createElement('button');
+                resetBtn.textContent = 'Reset';
+                resetBtn.className = 'action-btn clear-btn';
+                resetBtn.onclick = () => {
+                    // --- BARU ---
+                    playClickSound();
+                    // --- AKHIR BARU ---
+                    lastClicked = 0;
+                    chart.querySelectorAll('.number-cell').forEach(c => c.classList.remove('highlight-one'));
+                    feedbackEl.innerHTML = '';
+                };
+                gameArea.appendChild(resetBtn);
+            }
+
+            // Game 2: Hitung per 10 (K.CC.A.1)
+            function initGame2() {
+                gameDescription.innerHTML = `
+                    <h3>2. Hitung Kelipatan 10 <button class="speak-btn" aria-label="Dengarkan Instruksi">🔊</button></h3>
+                    <p><strong>Tujuan:</strong> Belajar berhitung loncat 10 (K.CC.A.1).</p>
+                    <p><strong>Cara Bermain:</strong> Klik tombol "Mulai Hitung per 10" dan lihat angka-angka kelipatan 10 menyala secara berurutan.</p>
+                `;
+
+                const chart = document.createElement('div');
+                chart.className = 'number-chart';
+                currentNumberChart = []; // Isi array
+                
+                for (let i = 1; i <= 100; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'number-cell';
+                    cell.textContent = i;
+                    cell.id = 'cell-' + i;
+                    chart.appendChild(cell);
+                    currentNumberChart.push(cell); // Simpan sel
+                }
+                gameArea.appendChild(chart);
+
+                const startBtn = document.createElement('button');
+                startBtn.textContent = 'Mulai Hitung per 10';
+                startBtn.className = 'action-btn';
+                startBtn.onclick = () => {
+                    // --- BARU ---
+                    playClickSound();
+                    // --- AKHIR BARU ---
+                    
+                    // Reset dulu
+                    currentNumberChart.forEach(c => c.classList.remove('highlight-ten'));
+                    
+                    let count = 0;
+                    function highlightNext() {
+                        if (count <= 10) {
+                            if (count > 0) {
+                                const num = count * 10;
+                                const cell = document.getElementById('cell-' + num);
+                                if (cell) {
+                                    cell.classList.add('highlight-ten');
+                                    // --- BARU ---
+                                    // Nada naik per kelipatan 10
+                                    playSound('sine', 0.1, 200 + count * 30);
+                                    // --- AKHIR BARU ---
+                                }
+                            }
+                            count++;
+                            if(count <= 10) setTimeout(highlightNext, 400); // Jeda 400ms
+                        } else {
+                            showFeedback('Bagus! 10, 20, 30... 100!', true);
+                        }
+                    }
+                    highlightNext();
+                };
+                gameArea.appendChild(startBtn);
+            }
+
+            // Game 3: Lanjutkan Hitungan (K.CC.A.2)
+            function initGame3() {
+                gameDescription.innerHTML = `
+                    <h3>3. Lanjutkan Berhitung <button class="speak-btn" aria-label="Dengarkan Instruksi">🔊</button></h3>
+                    <p><strong>Tujuan:</strong> Berhitung maju dari angka tertentu (K.CC.A.2).</p>
+                    <p><strong>Cara Bermain:</strong> Lihat angka yang muncul. Tuliskan 3 angka selanjutnya di kotak yang tersedia, lalu klik "Cek".</p>
+                `;
+                
+                let startNum;
+
+                function setupGame() {
+                    gameArea.innerHTML = ''; // Bersihkan dulu
+                    startNum = getRandomInt(1, 17); // Maks 17, agar 17, 18, 19, 20
+                    
+                    const p = document.createElement('p');
+                    p.innerHTML = `Mulai berhitung dari: <strong style="font-size: 2rem;">${startNum}</strong>`;
+                    p.style.marginBottom = '10px';
+                    gameArea.appendChild(p);
+
+                    const inputContainer = document.createElement('div');
+                    for (let i = 1; i <= 3; i++) {
+                        const input = document.createElement('input');
+                        input.type = 'number';
+                        input.className = 'number-input';
+                        input.id = 'input-' + i;
+                        inputContainer.appendChild(input);
+                    }
+                    gameArea.appendChild(inputContainer);
+
+                    const checkBtn = document.createElement('button');
+                    checkBtn.textContent = 'Cek';
+                    checkBtn.className = 'action-btn';
+                    checkBtn.onclick = () => {
+                        // --- BARU ---
+                        playClickSound();
+                        // --- AKHIR BARU ---
+                        const val1 = document.getElementById('input-1').value;
+                        const val2 = document.getElementById('input-2').value;
+                        const val3 = document.getElementById('input-3').value;
+                        
+                        if (val1 == startNum + 1 && val2 == startNum + 2 && val3 == startNum + 3) {
+                            showFeedback('Benar! Urutannya: ' + startNum + ', ' + (startNum+1) + ', ' + (startNum+2) + ', ' + (startNum+3), true);
+                            setTimeout(setupGame, 2000); // Game baru
+                        } else {
+                            showFeedback('Belum tepat. Coba hitung lagi!', false);
+                        }
+                    };
+                    gameArea.appendChild(checkBtn);
+                }
+                
+                setupGame(); // Mulai game pertama
+            }
+
+            // Game 4: Isi Ten Frame (K.CC.A.3, K.CC.B.4)
+            function initGame4() {
+                gameDescription.innerHTML = `
+                    <h3>4. Isi Bingkai Sepuluh (Ten Frame) <button class="speak-btn" aria-label="Dengarkan Instruksi">🔊</button></h3>
+                    <p><strong>Tujuan:</strong> Mengenal angka dan jumlah 1-10 (K.CC.A.3, K.CC.B.4).</p>
+                    <p><strong>Cara Bermain:</strong> Lihat angka yang diminta. Klik pada kotak-kotak di 'Ten Frame' untuk mengisinya dengan bulatan merah sampai jumlahnya pas.</p>
+                `;
+                
+                let targetNum;
+                let currentDots = 0;
+                let frameSlots = [];
+
+                function createTenFrame() {
+                    const frame = document.createElement('div');
+                    frame.className = 'ten-frame';
+                    frameSlots = []; // Kosongkan
+                    for (let i = 0; i < 10; i++) {
+                        const slot = document.createElement('div');
+                        slot.className = 'ten-frame-slot';
+                        slot.dataset.filled = 'false';
+                        
+                        slot.addEventListener('click', () => {
+                            // --- BARU ---
+                            playClickSound();
+                            // --- AKHIR BARU ---
+                            if (slot.dataset.filled === 'false') {
+                                slot.innerHTML = '<div class="ten-frame-dot"></div>';
+                                slot.dataset.filled = 'true';
+                                currentDots++;
+                            } else {
+                                slot.innerHTML = '';
+                                slot.dataset.filled = 'false';
+                                currentDots--;
+                            }
+                            checkTenFrame();
+                        });
+                        frameSlots.push(slot);
+                        frame.appendChild(slot);
+                    }
+                    return frame;
+                }
+                
+                function checkTenFrame() {
+                    if (currentDots === targetNum) {
+                        showFeedback('Benar! Jumlahnya ' + targetNum, true);
+                        setTimeout(setupGame, 2000);
+                    }
+                }
+
+                function setupGame() {
+                    gameArea.innerHTML = '';
+                    currentDots = 0;
+                    targetNum = getRandomInt(1, 10);
+                    
+                    const p = document.createElement('p');
+                    p.innerHTML = `Ayo buat gambar untuk angka: <strong style="font-size: 2rem;">${targetNum}</strong>`;
+                    p.style.marginBottom = '10px';
+                    gameArea.appendChild(p);
+                    
+                    gameArea.appendChild(createTenFrame());
+                }
+                
+                setupGame();
+            }
+
+            // Game 5: Hitung Benda (K.CC.B.5)
+            function initGame5() {
+                gameDescription.innerHTML = `
+                    <h3>5. Hitung Benda Tersebar <button class="speak-btn" aria-label="Dengarkan Instruksi">🔊</button></h3>
+                    <p><strong>Tujuan:</strong> Menghitung jumlah benda (kardinalitas) (K.CC.B.5).</p>
+                    <p><strong>Cara Bermain:</strong> Hitung ada berapa benda (misal: 🍎) di dalam kotak. Tulis jumlahnya di kotak jawaban, lalu klik "Cek".</p>
+                `;
+                
+                let targetNum;
+                const emojis = ['🍎', '🍌', '🍓', '🍇', '🍉', '⭐', '❤️', '⚽', '🚗', '🐞'];
+                
+                function setupGame() {
+                    gameArea.innerHTML = '';
+                    targetNum = getRandomInt(3, 10); // 3-10 benda tersebar
+                    const currentEmoji = emojis[getRandomInt(0, emojis.length - 1)];
+                    
+                    const container = document.createElement('div');
+                    container.className = 'object-container';
+                    
+                    for (let i = 0; i < targetNum; i++) {
+                        const obj = document.createElement('div');
+                        obj.className = 'game-object';
+                        obj.textContent = currentEmoji;
+                        obj.style.left = `${getRandomInt(5, 85)}%`; // Posisi acak
+                        obj.style.top = `${getRandomInt(5, 80)}%`;
+                        container.appendChild(obj);
+                    }
+                    gameArea.appendChild(container);
+
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'number-input';
+                    input.id = 'count-input';
+                    gameArea.appendChild(input);
+                    
+                    const checkBtn = document.createElement('button');
+                    checkBtn.textContent = 'Cek';
+                    checkBtn.className = 'action-btn';
+                    checkBtn.onclick = () => {
+                        // --- BARU ---
+                        playClickSound();
+                        // --- AKHIR BARU ---
+                        const answer = document.getElementById('count-input').value;
+                        if (answer == targetNum) {
+                            showFeedback('Benar! Ada ' + targetNum + ' ' + currentEmoji, true);
+                            setTimeout(setupGame, 2000);
+                        } else {
+                            showFeedback('Belum tepat, coba hitung lagi!', false);
+                        }
+                    };
+                    gameArea.appendChild(checkBtn);
+                }
+                
+                setupGame();
+            }
+
+            // Game 6: Satu Lebih Banyak (K.CC.B.4.c)
+            function initGame6() {
+                gameDescription.innerHTML = `
+                    <h3>6. Satu Lebih Banyak <button class="speak-btn" aria-label="Dengarkan Instruksi">🔊</button></h3>
+                    <p><strong>Tujuan:</strong> Memahami bahwa setiap angka adalah 'satu lebih banyak' dari angka sebelumnya (K.CC.B.4.c).</p>
+                    <p><strong>Cara Bermain:</strong> Lihat jumlah benda di Ten Frame. Berapa jumlahnya jika ditambah SATU lagi? Tulis jawabanmu.</p>
+                `;
+                
+                let startNum;
+
+                function createTenFrame(dotCount) {
+                    const frame = document.createElement('div');
+                    frame.className = 'ten-frame';
+                    for (let i = 0; i < 10; i++) {
+                        const slot = document.createElement('div');
+                        slot.className = 'ten-frame-slot';
+                        if (i < dotCount) {
+                            slot.innerHTML = '<div class="ten-frame-dot"></div>';
+                        }
+                        frame.appendChild(slot);
+                    }
+                    return frame;
+                }
+
+                function setupGame() {
+                    gameArea.innerHTML = '';
+                    startNum = getRandomInt(1, 9); // Maks 9, agar 1 lebihnya 10
+                    
+                    gameArea.appendChild(createTenFrame(startNum));
+                    
+                    const p = document.createElement('p');
+                    p.innerHTML = `Di sini ada ${startNum} bulatan. <br/>Berapa jumlahnya jika ditambah <strong>SATU</strong> lagi?`;
+                    p.style.margin = '10px 0';
+                    p.style.textAlign = 'center';
+                    gameArea.appendChild(p);
+                    
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'number-input';
+                    input.id = 'one-more-input';
+                    gameArea.appendChild(input);
+                    
+                    const checkBtn = document.createElement('button');
+                    checkBtn.textContent = 'Cek';
+                    checkBtn.className = 'action-btn';
+                    checkBtn.onclick = () => {
+                        // --- BARU ---
+                        playClickSound();
+                        // --- AKHIR BARU ---
+                        const answer = document.getElementById('one-more-input').value;
+                        if (answer == startNum + 1) {
+                            showFeedback(`Benar! ${startNum} ditambah satu lagi jadi ${startNum + 1}`, true);
+                            setTimeout(setupGame, 2000);
+                        } else {
+                            showFeedback('Belum tepat. Coba hitung lagi!', false);
+                        }
+                    };
+                    gameArea.appendChild(checkBtn);
+                }
+                
+                setupGame();
+            }
+
+            // Game 7: Ambil Benda (K.CC.B.5)
+            function initGame7() {
+                gameDescription.innerHTML = `
+                    <h3>7. Ambil Benda (Count Out) <button class="speak-btn" aria-label="Dengarkan Instruksi">🔊</button></h3>
+                    <p><strong>Tujuan:</strong> Menghitung sejumlah benda sesuai angka yang diberikan (K.CC.B.5).</p>
+                    <p><strong>Cara Bermain:</strong> Lihat angka yang diminta. Klik tombol "Ambil 1 🌼" sampai jumlah bunga di dalam kotak pas dengan angka itu.</p>
+                `;
+                
+                let targetNum;
+                let currentCount;
+                let box;
+
+                function setupGame() {
+                    gameArea.innerHTML = '';
+                    targetNum = getRandomInt(5, 20); // 5-20
+                    currentCount = 0;
+
+                    const p = document.createElement('p');
+                    p.innerHTML = `Ayo ambil <strong style="font-size: 2rem;">${targetNum}</strong> bunga 🌼`;
+                    p.style.marginBottom = '10px';
+                    gameArea.appendChild(p);
+                    
+                    const addBtn = document.createElement('button');
+                    addBtn.textContent = 'Ambil 1 🌼';
+                    addBtn.className = 'action-btn';
+                    addBtn.onclick = () => {
+                        if (currentCount < targetNum) {
+                            // --- BARU ---
+                            // Nada naik sedikit setiap ambil
+                            playSound('triangle', 0.05, 300 + currentCount * 5);
+                            // --- AKHIR BARU ---
+                            currentCount++;
+                            const obj = document.createElement('span');
+                            obj.className = 'collected-object';
+                            obj.textContent = '🌼';
+                            box.appendChild(obj);
+                            
+                            if (currentCount === targetNum) {
+                                showFeedback('Pas! Kamu mengambil ' + targetNum + ' bunga!', true);
+                                addBtn.disabled = true;
+                                setTimeout(setupGame, 2000);
+                            }
+                        } else {
+                            // Seharusnya tidak terjadi jika tombol dinonaktifkan
+                        }
+                    };
+                    gameArea.appendChild(addBtn);
+                    
+                    box = document.createElement('div');
+                    box.id = 'object-box';
+                    box.setAttribute('aria-label', 'Kotak untuk mengumpulkan bunga');
+                    gameArea.appendChild(box);
+                }
+                
+                setupGame();
+            }
+
+            // Game 8: Bandingkan Kelompok (K.CC.C.6)
+            function initGame8() {
+                gameDescription.innerHTML = `
+                    <h3>8. Bandingkan Kelompok (Ten Frames) <button class="speak-btn" aria-label="Dengarkan Instruksi">🔊</button></h3>
+                    <p><strong>Tujuan:</strong> Membandingkan jumlah benda di dua kelompok (lebih banyak, lebih sedikit, atau sama) (K.CC.C.6).</p>
+                    <p><strong>Cara Bermain:</strong> Lihat dua Ten Frame. Apakah kelompok kiri lebih banyak ( > ), lebih sedikit ( < ), atau sama dengan ( = ) kelompok kanan? Klik tombol yang benar.</p>
+                `;
+                
+                let num1, num2;
+
+                function createTenFrame(dotCount) {
+                    const frame = document.createElement('div');
+                    frame.className = 'ten-frame';
+                    for (let i = 0; i < 10; i++) {
+                        const slot = document.createElement('div');
+                        slot.className = 'ten-frame-slot';
+                        if (i < dotCount) {
+                            slot.innerHTML = '<div class="ten-frame-dot" style="background-color: #42a5f5;"></div>'; // Biru
+                        }
+                        frame.appendChild(slot);
+                    }
+                    return frame;
+                }
+
+                function setupGame() {
+                    gameArea.innerHTML = '';
+                    num1 = getRandomInt(1, 10);
+                    num2 = getRandomInt(1, 10);
+                    
+                    const comparisonArea = document.createElement('div');
+                    comparisonArea.className = 'comparison-area';
+                    
+                    // Kelompok 1 (Kiri)
+                    comparisonArea.appendChild(createTenFrame(num1));
+                    
+                    // Tombol Pilihan
+                    const btnGroup = document.createElement('div');
+                    btnGroup.className = 'compare-btn-group';
+                    
+                    const gtBtn = document.createElement('button'); // >
+                    gtBtn.textContent = '>';
+                    gtBtn.className = 'action-btn compare-btn';
+                    gtBtn.onclick = () => { playClickSound(); checkCompare(num1 > num2); };
+                    
+                    const ltBtn = document.createElement('button'); // <
+                    ltBtn.textContent = '<';
+                    ltBtn.className = 'action-btn compare-btn';
+                    ltBtn.onclick = () => { playClickSound(); checkCompare(num1 < num2); };
+                    
+                    const eqBtn = document.createElement('button'); // =
+                    eqBtn.textContent = '=';
+                    eqBtn.className = 'action-btn compare-btn';
+                    eqBtn.onclick = () => { playClickSound(); checkCompare(num1 === num2); };
+
+                    btnGroup.append(gtBtn, ltBtn, eqBtn);
+                    comparisonArea.appendChild(btnGroup);
+                    
+                    // Kelompok 2 (Kanan)
+                    comparisonArea.appendChild(createTenFrame(num2));
+                    
+                    gameArea.appendChild(comparisonArea);
+                }
+                
+                function checkCompare(isCorrect) {
+                    if (isCorrect) {
+                        showFeedback('Benar!', true);
+                        setTimeout(setupGame, 2000);
+                    } else {
+                        showFeedback('Coba perhatikan lagi!', false);
+                    }
+                }
+                
+                setupGame();
+            }
+
+            // Game 9: Bandingkan Angka (K.CC.C.7)
+            function initGame9() {
+                gameDescription.innerHTML = `
+                    <h3>9. Bandingkan Angka (Numerals) <button class="speak-btn" aria-label="Dengarkan Instruksi">🔊</button></h3>
+                    <p><strong>Tujuan:</strong> Membandingkan dua angka tertulis (1-10) (K.CC.C.7).</p>
+                    <p><strong>Cara Bermain:</strong> Lihat dua angka. Apakah angka kiri lebih besar ( > ), lebih kecil ( < ), atau sama dengan ( = ) angka kanan? Klik tombol yang benar.</p>
+                `;
+                
+                let num1, num2;
+                
+                function setupGame() {
+                    gameArea.innerHTML = '';
+                    num1 = getRandomInt(1, 10);
+                    num2 = getRandomInt(1, 10);
+                    
+                    const comparisonArea = document.createElement('div');
+                    comparisonArea.className = 'comparison-area';
+                    
+                    // Angka 1 (Kiri)
+                    const box1 = document.createElement('div');
+                    box1.className = 'compare-box';
+                    box1.textContent = num1;
+                    comparisonArea.appendChild(box1);
+                    
+                    // Tombol Pilihan
+                    const btnGroup = document.createElement('div');
+                    btnGroup.className = 'compare-btn-group';
+                    
+                    const gtBtn = document.createElement('button'); // >
+                    gtBtn.textContent = '>';
+                    gtBtn.className = 'action-btn compare-btn';
+                    gtBtn.onclick = () => { playClickSound(); checkCompare(num1 > num2); };
+                    
+                    const ltBtn = document.createElement('button'); // <
+                    ltBtn.textContent = '<';
+                    ltBtn.className = 'action-btn compare-btn';
+                    ltBtn.onclick = () => { playClickSound(); checkCompare(num1 < num2); };
+                    
+                    const eqBtn = document.createElement('button'); // =
+                    eqBtn.textContent = '=';
+                    eqBtn.className = 'action-btn compare-btn';
+                    eqBtn.onclick = () => { playClickSound(); checkCompare(num1 === num2); };
+
+                    btnGroup.append(gtBtn, ltBtn, eqBtn);
+                    comparisonArea.appendChild(btnGroup);
+                    
+                    // Angka 2 (Kanan)
+                    const box2 = document.createElement('div');
+                    box2.className = 'compare-box';
+                    box2.textContent = num2;
+                    comparisonArea.appendChild(box2);
+                    
+                    gameArea.appendChild(comparisonArea);
+                }
+                
+                function checkCompare(isCorrect) {
+                    if (isCorrect) {
+                        showFeedback('Benar!', true);
+                        setTimeout(setupGame, 2000);
+                    } else {
+                        showFeedback('Coba perhatikan lagi!', false);
+                    }
+                }
+                
+                setupGame();
+            }
+            
+            // Game 10: Menulis Angka (K.CC.A.3)
+            function initGame10() {
+                gameDescription.innerHTML = `
+                    <h3>10. Menulis Angka 0-9 <button class="speak-btn" aria-label="Dengarkan Instruksi">🔊</button></h3>
+                    <p><strong>Tujuan:</strong> Latihan menulis angka (K.CC.A.3).</p>
+                    <p><strong>Cara Bermain:</strong> Klik tombol angka (0-9) untuk melihat contohnya. Gunakan mouse (atau jari di layar sentuh) untuk menebalkan angka di kanvas. Klik "Hapus" untuk membersihkan.</p>
+                `;
+                
+                // Kontrol untuk tombol angka dan hapus
+                const controls = document.createElement('div');
+                controls.id = 'canvas-controls';
+                
+                for (let i = 0; i <= 9; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'num-btn';
+                    btn.textContent = i;
+                    btn.onclick = () => { playClickSound(); showGhostNumber(i); };
+                    controls.appendChild(btn);
+                }
+                
+                const clearBtn = document.createElement('button');
+                clearBtn.textContent = 'Hapus';
+                clearBtn.className = 'action-btn clear-btn';
+                clearBtn.onclick = () => { playClickSound(); clearCanvas(); };
+                controls.appendChild(clearBtn);
+                
+                gameArea.appendChild(controls);
+                
+                // Angka "hantu" di belakang kanvas
+                const ghostNumber = document.createElement('div');
+                ghostNumber.id = 'ghost-number';
+                ghostNumber.textContent = '1'; // Default
+                gameArea.appendChild(ghostNumber);
+                
+                // Kanvas untuk menggambar
+                const canvas = document.createElement('canvas');
+                canvas.id = 'drawing-canvas';
+                canvas.width = 300;
+                canvas.height = 300;
+                gameArea.appendChild(canvas);
+                
+                const ctx = canvas.getContext('2d');
+                ctx.strokeStyle = '#0000ff'; // Biru
+                ctx.lineWidth = 10;
+                ctx.lineCap = 'round';
+                
+                let drawing = false;
+                
+                function showGhostNumber(num) {
+                    clearCanvas();
+                    ghostNumber.textContent = num;
+                }
+                
+                function clearCanvas() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+
+                function getPos(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    let clientX, clientY;
+                    if (e.touches) {
+                        clientX = e.touches[0].clientX;
+                        clientY = e.touches[0].clientY;
+                    } else {
+                        clientX = e.clientX;
+                        clientY = e.clientY;
+                    }
+                    return {
+                        x: clientX - rect.left,
+                        y: clientY - rect.top
+                    };
+                }
+
+                function startDrawing(e) {
+                    e.preventDefault();
+                    drawing = true;
+                    const pos = getPos(e);
+                    ctx.beginPath();
+                    ctx.moveTo(pos.x, pos.y);
+                }
+                
+                function draw(e) {
+                    e.preventDefault();
+                    if (!drawing) return;
+                    const pos = getPos(e);
+                    ctx.lineTo(pos.x, pos.y);
+                    ctx.stroke();
+                }
+                
+                function stopDrawing(e) {
+                    e.preventDefault();
+                    drawing = false;
+                }
+                
+                // Mouse Events
+                canvas.addEventListener('mousedown', startDrawing);
+                canvas.addEventListener('mousemove', draw);
+                canvas.addEventListener('mouseup', stopDrawing);
+                canvas.addEventListener('mouseout', stopDrawing);
+                
+                // Touch Events
+                canvas.addEventListener('touchstart', startDrawing);
+                canvas.addEventListener('touchmove', draw);
+                canvas.addEventListener('touchend', stopDrawing);
+
+                showGhostNumber(1); // Tampilkan angka 1 saat awal
+            }
+            
+        });
+    </script>
+</body>
+</html>
