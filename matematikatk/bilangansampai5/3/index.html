@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Matematika TK: 1 Lebih & 1 Kurang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff; /* sky-50 */
+            touch-action: manipulation;
+        }
+        .game-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            user-select: none;
+        }
+        .game-card:active {
+            transform: scale(0.95);
+        }
+        .correct {
+            background-color: #86efac !important; /* green-300 */
+            border-color: #22c55e !important; /* green-500 */
+            transform: scale(1.1) !important;
+        }
+        .incorrect {
+            background-color: #fca5a5 !important; /* red-300 */
+            border-color: #ef4444 !important; /* red-500 */
+            animation: shake 0.5s;
+        }
+        .number-button {
+            font-size: 2.5rem;
+            font-weight: 900;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            background-color: white;
+            border: 4px solid #e5e7eb;
+            color: #3b82f6;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+        .number-button:hover {
+            border-color: #60a5fa;
+            transform: translateY(-2px);
+        }
+
+        /* --- FIVE FRAME --- */
+        .five-frame {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 350px;
+            padding: 10px;
+            background-color: white;
+            border: 4px solid #3b82f6;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .five-frame-cell {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            position: relative;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .five-frame-dot {
+            width: 70%;
+            height: 70%;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        @keyframes pop {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        .pop-in {
+            animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Navigation */
+        .nav-button-active {
+            background-color: #3b82f6;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Question Text Styles */
+        .text-more { color: #16a34a; } /* Green */
+        .text-less { color: #dc2626; } /* Red */
+    </style>
+</head>
+<body class="bg-blue-50 text-gray-800 min-h-screen p-4 flex flex-col items-center">
+
+    <div class="w-full max-w-2xl bg-white rounded-3xl shadow-xl p-4 md:p-8 border-b-8 border-blue-200">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-black text-blue-600 tracking-tight">1 Lebih & 1 Kurang</h1>
+            <p class="text-gray-500 text-sm md:text-base mt-1 font-bold">Matematika TK - Bilangan sampai 5</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="flex justify-center space-x-2 md:space-x-4 mb-8 overflow-x-auto py-2">
+            <button id="nav-pics" class="nav-button nav-button-active whitespace-nowrap text-sm md:text-base font-bold py-2 px-6 rounded-full bg-blue-500 text-white shadow-md transition-all" onclick="switchGame('pics')">
+                🖼️ Gambar
+            </button>
+            <button id="nav-frames" class="nav-button whitespace-nowrap text-sm md:text-base font-bold py-2 px-6 rounded-full bg-gray-100 text-gray-600 shadow-md transition-all hover:bg-gray-200" onclick="switchGame('frames')">
+                🔲 Bingkai
+            </button>
+            <button id="nav-nums" class="nav-button whitespace-nowrap text-sm md:text-base font-bold py-2 px-6 rounded-full bg-gray-100 text-gray-600 shadow-md transition-all hover:bg-gray-200" onclick="switchGame('nums')">
+                🔢 Angka
+            </button>
+        </nav>
+
+        <main class="relative min-h-[420px]">
+            <!-- Audio Button -->
+            <div class="absolute top-0 right-0 z-10">
+                <button onclick="playCurrentInstruction()" class="bg-yellow-400 hover:bg-yellow-500 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-90" aria-label="Dengarkan Soal">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                </button>
+            </div>
+
+            <!-- Dynamic Question Text -->
+            <div id="question-text" class="text-xl md:text-2xl font-bold text-gray-700 mb-6 text-center px-8 transition-colors">
+                <!-- Text injected via JS -->
+            </div>
+
+            <!-- GAME 1: PICTURES (Skill 1 & 4) -->
+            <div id="game-pics" class="game-container flex flex-col items-center justify-between h-full">
+                <!-- Display Area -->
+                <div id="pics-display" class="w-full flex justify-center items-center mb-8 min-h-[180px]">
+                    <!-- Items will be injected here -->
+                </div>
+                <!-- Options -->
+                <div id="pics-options" class="flex justify-center gap-4 md:gap-6 w-full flex-wrap"></div>
+            </div>
+
+            <!-- GAME 2: FRAMES (Skill 2 & 5) -->
+            <div id="game-frames" class="game-container hidden flex flex-col items-center justify-between h-full">
+                <div class="flex flex-col items-center justify-center flex-grow w-full mb-8">
+                    <div id="frames-display" class="five-frame bg-blue-50">
+                        <!-- Cells injected here -->
+                    </div>
+                </div>
+                <div id="frames-options" class="flex justify-center gap-4 md:gap-6 w-full flex-wrap"></div>
+            </div>
+
+            <!-- GAME 3: NUMBERS (Skill 3) -->
+            <div id="game-nums" class="game-container hidden flex flex-col items-center justify-between h-full">
+                <div id="nums-display" class="flex items-center justify-center gap-4 mb-12 flex-col">
+                    <!-- Big Number Card -->
+                </div>
+                <div id="nums-options" class="flex justify-center gap-4 md:gap-6 w-full flex-wrap"></div>
+            </div>
+
+            <!-- Feedback Area -->
+            <div id="feedback-area" class="h-12 mt-8 flex items-center justify-center text-2xl font-black text-center transition-all duration-300 transform scale-0">
+                <!-- Feedback text -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        // --- ASSETS (SVG) ---
+        const svgs = {
+            apple: `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md"><path d="M50,25 C60,5 90,10 90,40 C90,75 55,95 50,95 C45,95 10,75 10,40 C10,10 40,5 50,25 Z" fill="#ef4444"/><path d="M50,25 Q55,5 65,10" stroke="#78350f" stroke-width="3" fill="none"/><path d="M50,25 Q30,15 30,35" fill="#4ade80"/></svg>`,
+            car: `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md"><path d="M10,60 L20,40 L70,40 L85,60 L95,60 L95,80 L5,80 L5,60 Z" fill="#3b82f6"/><circle cx="25" cy="80" r="10" fill="#333"/><circle cx="75" cy="80" r="10" fill="#333"/><rect x="25" y="45" width="40" height="15" fill="#bae6fd"/></svg>`,
+            star: `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md"><polygon points="50,5 61,35 95,35 68,55 79,90 50,70 21,90 32,55 5,35 39,35" fill="#facc15" stroke="#eab308" stroke-width="3"/></svg>`,
+            ball: `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md"><circle cx="50" cy="50" r="40" fill="#f97316"/><path d="M15,50 Q50,20 85,50" fill="none" stroke="#fff" stroke-width="3"/><path d="M15,50 Q50,80 85,50" fill="none" stroke="#fff" stroke-width="3"/></svg>`
+        };
+
+        // --- STATE ---
+        let activeGame = 'pics';
+        let currentTarget = 0; // The correct answer
+        let currentPromptText = ""; 
+        let isProcessing = false;
+        const synth = window.speechSynthesis;
+
+        // --- CORE NAVIGATION ---
+        function switchGame(gameId) {
+            activeGame = gameId;
+            isProcessing = false;
+            
+            // UI Toggle
+            document.querySelectorAll('.game-container').forEach(el => el.classList.add('hidden'));
+            document.getElementById('game-' + gameId).classList.remove('hidden');
+            
+            // Nav Styles
+            document.querySelectorAll('.nav-button').forEach(el => {
+                el.classList.remove('nav-button-active', 'bg-blue-500', 'text-white');
+                el.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            const btn = document.getElementById('nav-' + gameId);
+            btn.classList.add('nav-button-active', 'bg-blue-500', 'text-white');
+            btn.classList.remove('bg-gray-100', 'text-gray-600');
+
+            // Reset Feedback
+            document.getElementById('feedback-area').classList.add('scale-0');
+
+            // Init Specific Game
+            if(gameId === 'pics') initGamePics();
+            if(gameId === 'frames') initGameFrames();
+            if(gameId === 'nums') initGameNums();
+        }
+
+        // --- LOGIC HELPERS ---
+        // Generates logic for "1 More" or "1 Less" within 0-5 range
+        function generateMathProblem(forceMore = false) {
+            // Decide More or Less (50/50 unless forced)
+            const isMore = forceMore || Math.random() > 0.5;
+            
+            let base, answer;
+
+            if (isMore) {
+                // Topic: One More (Up to 5)
+                // Base can be 0, 1, 2, 3, 4. Answer will be 1, 2, 3, 4, 5.
+                base = Math.floor(Math.random() * 5); 
+                answer = base + 1;
+            } else {
+                // Topic: One Less (From up to 5)
+                // Base can be 1, 2, 3, 4, 5. Answer will be 0, 1, 2, 3, 4.
+                base = Math.floor(Math.random() * 5) + 1;
+                answer = base - 1;
+            }
+
+            return { base, answer, isMore };
+        }
+
+        function setQuestionText(isMore, baseNum) {
+            const el = document.getElementById('question-text');
+            el.classList.remove('text-more', 'text-less');
+            
+            if(isMore) {
+                el.classList.add('text-more');
+                currentPromptText = `Satu lebihnya dari ${baseNum} adalah...`;
+                el.innerHTML = `1 Lebihnya dari <span class="font-black text-3xl mx-1">${baseNum}</span> adalah...`;
+            } else {
+                el.classList.add('text-less');
+                currentPromptText = `Satu kurangnya dari ${baseNum} adalah...`;
+                el.innerHTML = `1 Kurangnya dari <span class="font-black text-3xl mx-1">${baseNum}</span> adalah...`;
+            }
+            speak(currentPromptText);
+        }
+
+        // --- GAME 1: GAMBAR (Pictures) ---
+        // Covers: One more with pictures & One less with pictures
+        function initGamePics() {
+            const { base, answer, isMore } = generateMathProblem();
+            currentTarget = answer;
+
+            // Display Logic
+            const display = document.getElementById('pics-display');
+            display.innerHTML = '';
+            
+            const types = ['apple', 'car', 'star', 'ball'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex flex-wrap justify-center gap-4 max-w-[300px]';
+            
+            if (base === 0) {
+                 wrapper.innerHTML = '<span class="text-gray-400 text-xl font-bold italic">Kosong (0)</span>';
+            } else {
+                for(let i=0; i<base; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'pop-in w-16 h-16 md:w-20 md:h-20';
+                    el.innerHTML = svgs[type];
+                    wrapper.appendChild(el);
+                }
+            }
+            display.appendChild(wrapper);
+
+            setQuestionText(isMore, base);
+            generateOptions(answer, 'pics-options');
+        }
+
+        // --- GAME 2: BINGKAI (Frames) ---
+        // Covers: One more on frames & One less on frames
+        function initGameFrames() {
+            const { base, answer, isMore } = generateMathProblem();
+            currentTarget = answer;
+
+            const frame = document.getElementById('frames-display');
+            frame.innerHTML = '';
+
+            for(let i=0; i<5; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'five-frame-cell';
+                if(i < base) {
+                    const dot = document.createElement('div');
+                    dot.className = 'five-frame-dot pop-in';
+                    cell.appendChild(dot);
+                }
+                frame.appendChild(cell);
+            }
+
+            setQuestionText(isMore, base);
+            generateOptions(answer, 'frames-options');
+        }
+
+        // --- GAME 3: ANGKA (Numbers) ---
+        // Covers: One more (abstract)
+        function initGameNums() {
+            // Mostly "One More" as per requirement list, but allowing "One Less" occasionally for robustness
+            const { base, answer, isMore } = generateMathProblem(); 
+            currentTarget = answer;
+
+            const display = document.getElementById('nums-display');
+            display.innerHTML = '';
+
+            // Visual Card for Base Number
+            const card = document.createElement('div');
+            card.className = 'w-32 h-40 bg-white border-4 border-blue-200 rounded-xl flex items-center justify-center text-7xl font-black text-blue-600 shadow-lg pop-in mb-2';
+            card.textContent = base;
+            
+            // Equation helper (small)
+            const hint = document.createElement('div');
+            hint.className = 'text-gray-400 font-bold text-lg';
+            hint.textContent = isMore ? `${base} + 1 = ?` : `${base} - 1 = ?`;
+
+            display.appendChild(card);
+            display.appendChild(hint);
+
+            setQuestionText(isMore, base);
+            generateOptions(answer, 'nums-options');
+        }
+
+        // --- SHARED UI FUNCTIONS ---
+
+        function generateOptions(correct, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            // Create options set ensuring correct answer is included
+            let opts = new Set([correct]);
+            // Fill with other random numbers 0-5
+            while(opts.size < 3) {
+                let r = Math.floor(Math.random() * 6); // 0-5
+                if(r !== correct) opts.add(r);
+            }
+            let optionsArray = Array.from(opts).sort(() => Math.random() - 0.5);
+
+            optionsArray.forEach(num => {
+                const btn = document.createElement('button');
+                btn.className = 'number-button hover:bg-blue-50';
+                btn.textContent = num;
+                btn.onclick = (e) => playFeedback(num === correct, e.currentTarget);
+                container.appendChild(btn);
+            });
+        }
+
+        function playFeedback(isCorrect, buttonEl) {
+            if(isProcessing) return;
+            isProcessing = true;
+
+            const fb = document.getElementById('feedback-area');
+            const compliments = ['Hebat!', 'Pintar!', 'Benar!', 'Wow!'];
+            const encourages = ['Coba Lagi', 'Ayo Bisa', 'Ups...'];
+
+            if (isCorrect) {
+                buttonEl.classList.add('correct');
+                const text = compliments[Math.floor(Math.random() * compliments.length)];
+                fb.textContent = "🎉 " + text;
+                fb.className = "h-12 mt-8 flex items-center justify-center text-2xl font-black text-center transition-all duration-300 transform scale-100 text-green-500";
+                speak(text);
+                
+                setTimeout(() => {
+                    buttonEl.classList.remove('correct');
+                    fb.classList.remove('scale-100');
+                    fb.classList.add('scale-0');
+                    
+                    // Next Round
+                    if(activeGame === 'pics') initGamePics();
+                    if(activeGame === 'frames') initGameFrames();
+                    if(activeGame === 'nums') initGameNums();
+                    isProcessing = false;
+                }, 1500);
+            } else {
+                buttonEl.classList.add('incorrect');
+                const text = encourages[Math.floor(Math.random() * encourages.length)];
+                fb.textContent = "💪 " + text;
+                fb.className = "h-12 mt-8 flex items-center justify-center text-2xl font-black text-center transition-all duration-300 transform scale-100 text-red-400";
+                speak(text);
+
+                setTimeout(() => {
+                    buttonEl.classList.remove('incorrect');
+                    isProcessing = false;
+                }, 1000);
+            }
+        }
+
+        function speak(text) {
+            if (synth.speaking) synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+            synth.speak(utterance);
+        }
+
+        function playCurrentInstruction() {
+            speak(currentPromptText);
+        }
+
+        // Init
+        window.onload = () => {
+            switchGame('pics');
+            document.body.addEventListener('click', () => {
+                if(synth.paused) synth.resume();
+            }, {once:true});
+        };
+
+    </script>
+</body>
+</html>
