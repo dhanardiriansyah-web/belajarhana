@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Matematika TK (1-5)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .game-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .correct {
+            border: 4px solid #4ade80 !important; /* green-400 */
+            animation: bounce 0.5s;
+        }
+        .incorrect {
+            border: 4px solid #f87171 !important; /* red-400 */
+            animation: shake 0.5s;
+        }
+        .number-button {
+            font-size: 2.5rem;
+            font-weight: 900;
+            width: 70px;
+            height: 70px;
+            @media (min-width: 768px) {
+                width: 90px;
+                height: 90px;
+            }
+        }
+        /* Matching Layout Styles */
+        .matching-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center; 
+            justify-content: flex-start;
+            min-height: 160px;
+        }
+        .choice-box {
+            border: 3px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 1rem;
+            transition: all 0.2s;
+        }
+        .choice-box:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* Navigation Scroll for Mobile */
+        .nav-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE 10+ */
+        }
+        .nav-scroll::-webkit-scrollbar { 
+            display: none;  /* Chrome/Safari */
+        }
+        
+        .nav-button-active {
+            background-color: #3b82f6; /* blue-600 */
+            color: white;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-blue-50 text-gray-800 min-h-screen p-4">
+    <div class="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-4 md:p-6">
+        <header class="text-center mb-6">
+            <h1 class="text-2xl md:text-4xl font-bold text-blue-600">Belajar Angka 1-5</h1>
+            <p class="text-gray-500 mt-1 text-sm md:text-base">Pilih permainan di bawah ini!</p>
+        </header>
+
+        <!-- Navigasi Game (Scrollable on mobile) -->
+        <nav class="nav-scroll mb-6">
+            <button id="nav-game1" class="nav-button nav-button-active whitespace-nowrap text-sm font-bold py-2 px-4 rounded-full bg-blue-500 text-white shadow-md" onclick="switchGame('game1')">1. Sama Tidak?</button>
+            <button id="nav-game2" class="nav-button whitespace-nowrap text-sm font-bold py-2 px-4 rounded-full bg-gray-200 text-gray-700 shadow-md" onclick="switchGame('game2')">2. Hitung Gambar</button>
+            <button id="nav-game3" class="nav-button whitespace-nowrap text-sm font-bold py-2 px-4 rounded-full bg-gray-200 text-gray-700 shadow-md" onclick="switchGame('game3')">3. Lebih Banyak</button>
+            <button id="nav-game4" class="nav-button whitespace-nowrap text-sm font-bold py-2 px-4 rounded-full bg-gray-200 text-gray-700 shadow-md" onclick="switchGame('game4')">4. Lebih Sedikit</button>
+            <button id="nav-game5" class="nav-button whitespace-nowrap text-sm font-bold py-2 px-4 rounded-full bg-gray-200 text-gray-700 shadow-md" onclick="switchGame('game5')">5. Kuis Campuran</button>
+        </nav>
+
+        <main>
+            <!-- Common Audio Button -->
+            <div class="text-center mb-4">
+                <button onclick="speakCurrentInstruction()" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-6 rounded-full inline-flex items-center shadow-md transition transform hover:scale-105">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                    Dengarkan Soal
+                </button>
+            </div>
+
+            <!-- Game 1: Are there the same number? -->
+            <div id="game1" class="game-container">
+                <h2 class="text-center text-xl font-bold mb-4 text-gray-700">Apakah jumlahnya sama?</h2>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
+                    <div id="game1-left" class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 w-full md:w-1/3 min-h-[150px] flex flex-wrap justify-center content-center gap-2"></div>
+                    <div class="text-4xl text-gray-400 font-black">= ?</div>
+                    <div id="game1-right" class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 w-full md:w-1/3 min-h-[150px] flex flex-wrap justify-center content-center gap-2"></div>
+                </div>
+                <div class="flex justify-center gap-6">
+                    <button onclick="checkGame1(true, this)" class="game-card bg-green-100 border-4 border-green-400 rounded-2xl p-4 w-24 h-24 flex flex-col items-center justify-center">
+                        <span class="text-4xl">✅</span>
+                        <span class="font-bold text-green-700">Sama</span>
+                    </button>
+                    <button onclick="checkGame1(false, this)" class="game-card bg-red-100 border-4 border-red-400 rounded-2xl p-4 w-24 h-24 flex flex-col items-center justify-center">
+                        <span class="text-4xl">❌</span>
+                        <span class="font-bold text-red-700">Beda</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Game 2: Count pictures (Equal to) -->
+            <div id="game2" class="game-container hidden">
+                <h2 class="text-center text-xl font-bold mb-4 text-gray-700">Ada berapa gambar di kotak?</h2>
+                <div class="flex justify-center mb-8">
+                    <div id="game2-area" class="bg-purple-50 border-4 border-purple-200 rounded-2xl p-6 min-w-[200px] min-h-[200px] flex flex-wrap justify-center content-center gap-3"></div>
+                </div>
+                <div id="game2-options" class="flex justify-center flex-wrap gap-4"></div>
+            </div>
+
+            <!-- Game 3: More -->
+            <div id="game3" class="game-container hidden">
+                <h2 class="text-center text-xl font-bold mb-2 text-gray-700">Mana yang <span class="text-blue-600 text-2xl">Lebih Banyak</span>?</h2>
+                <p class="text-center text-gray-400 text-sm mb-4">Tekan kotaknya</p>
+                <div class="grid grid-cols-2 gap-4 md:gap-8 max-w-2xl mx-auto">
+                    <button id="game3-opt1" onclick="checkComparison('game3', 0, this)" class="choice-box game-card bg-orange-50 hover:bg-orange-100 cursor-pointer flex flex-col items-center justify-center min-h-[200px]"></button>
+                    <button id="game3-opt2" onclick="checkComparison('game3', 1, this)" class="choice-box game-card bg-orange-50 hover:bg-orange-100 cursor-pointer flex flex-col items-center justify-center min-h-[200px]"></button>
+                </div>
+            </div>
+
+            <!-- Game 4: Fewer -->
+            <div id="game4" class="game-container hidden">
+                <h2 class="text-center text-xl font-bold mb-2 text-gray-700">Mana yang <span class="text-red-500 text-2xl">Lebih Sedikit</span>?</h2>
+                <p class="text-center text-gray-400 text-sm mb-4">Tekan kotaknya</p>
+                <div class="grid grid-cols-2 gap-4 md:gap-8 max-w-2xl mx-auto">
+                    <button id="game4-opt1" onclick="checkComparison('game4', 0, this)" class="choice-box game-card bg-pink-50 hover:bg-pink-100 cursor-pointer flex flex-col items-center justify-center min-h-[200px]"></button>
+                    <button id="game4-opt2" onclick="checkComparison('game4', 1, this)" class="choice-box game-card bg-pink-50 hover:bg-pink-100 cursor-pointer flex flex-col items-center justify-center min-h-[200px]"></button>
+                </div>
+            </div>
+
+            <!-- Game 5: Fewer and More (Mixed) -->
+            <div id="game5" class="game-container hidden">
+                <h2 id="game5-question" class="text-center text-xl font-bold mb-2 text-gray-700">Soal muncul disini...</h2>
+                <p class="text-center text-gray-400 text-sm mb-4">Tekan kotaknya</p>
+                <div class="grid grid-cols-2 gap-4 md:gap-8 max-w-2xl mx-auto">
+                    <button id="game5-opt1" onclick="checkComparison('game5', 0, this)" class="choice-box game-card bg-yellow-50 hover:bg-yellow-100 cursor-pointer flex flex-col items-center justify-center min-h-[200px]"></button>
+                    <button id="game5-opt2" onclick="checkComparison('game5', 1, this)" class="choice-box game-card bg-yellow-50 hover:bg-yellow-100 cursor-pointer flex flex-col items-center justify-center min-h-[200px]"></button>
+                </div>
+            </div>
+
+            <!-- Feedback Area -->
+            <div id="global-feedback" class="text-center font-bold text-2xl mt-8 h-8 transition-all duration-300"></div>
+        </main>
+    </div>
+
+    <script>
+        // --- ASSETS & DATA ---
+        const assets = {
+            apple: `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-sm"><g><path d="M148.5,108.8c0,32.7-26.5,59.2-59.2,59.2s-59.2-26.5-59.2-59.2c0-23,12-43.2,29.6-52.9c10.4-5.7,22.4-9,35.5-6.7 C110.1,28.8,126.9,15,126.9,15c15.1,17.4,11.4,41.3,11.4,41.3c8.3,6.3,10.2,20.2,10.2,20.2V108.8z" fill="#D0021B"/><path d="M115.5,49.2c-5.6-18.1-23-19.6-23-19.6s-5.3,15.6,2.5,25.3C102.8,64.6,115.5,49.2,115.5,49.2z" fill="#7ED321"/></g></svg>`,
+            car: `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-sm"><g><path d="M174.4,111.7c-3.2,10.1-26.4,13.2-26.4,13.2H50.8c0,0-15.1-4-19-15.3c-3.9-11.3,0-23.4,0-23.4l19-33.8h112.5 l18.2,34.8C181.5,87.2,177.6,101.5,174.4,111.7z" fill="#4A90E2"/><circle cx="65.5" cy="124.5" r="17.5" fill="#232323"/><circle cx="134.5" cy="124.5" r="17.5" fill="#232323"/><path d="M141.6,58.8L125,83.9H75L58.4,58.8H141.6z" fill="#A9D0F5"/></g></svg>`,
+            star: `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-sm"><path d="M100,10l25.8,52.3l57.7,8.4l-41.8,40.7l9.9,57.5L100,142.5l-51.6,26.9l9.9-57.5L16.5,70.7l57.7-8.4L100,10z" fill="#F8E71C" stroke="#F5A623" stroke-width="5" stroke-linejoin="round"/></svg>`,
+            sun: `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-sm"><g fill="#F8E71C"><circle cx="100" cy="100" r="45"/><path d="M100,30c-5.5,0-10-4.5-10-10V10c0-5.5,4.5-10,10-10s10,4.5,10,10v10C110,25.5,105.5,30,100,30z"/><path d="M100,190c-5.5,0-10-4.5-10-10v-10c0-5.5,4.5-10,10-10s10,4.5,10,10v10C110,185.5,105.5,190,100,190z"/><path d="M170,100c0,5.5,4.5,10,10,10h10c5.5,0,10-4.5,10-10s-4.5-10-10-10h-10C174.5,90,170,94.5,170,100z"/><path d="M10,100c0,5.5,4.5,10,10,10h10c5.5,0,10-4.5,10-10s-4.5-10-10-10H20C14.5,90,10,94.5,10,100z"/><path d="M156.1,58.1c-3.9,3.9-10.2,3.9-14.1,0l-7.1-7.1c-3.9-3.9-3.9-10.2,0-14.1s10.2-3.9,14.1,0l7.1,7.1 C160,47.9,160,54.2,156.1,58.1z"/><path d="M43.9,156.1c-3.9,3.9-10.2,3.9-14.1,0l-7.1-7.1c-3.9-3.9-3.9-10.2,0-14.1s10.2-3.9,14.1,0l7.1,7.1 C47.9,145.8,47.9,152.1,43.9,156.1z"/><path d="M156.1,141.9c3.9,3.9,3.9,10.2,0,14.1l-7.1,7.1c-3.9,3.9-10.2,3.9-14.1,0s-3.9-10.2,0-14.1l7.1-7.1 C145.8,138,152.1,138,156.1,141.9z"/><path d="M43.9,43.9c3.9,3.9,3.9,10.2,0,14.1l-7.1,7.1c-3.9,3.9-10.2,3.9-14.1,0s-3.9-10.2,0-14.1l7.1-7.1 C33.7,40,40,40,43.9,43.9z"/></g></svg>`,
+        };
+        const assetKeys = Object.keys(assets);
+
+        let activeGame = 'game1';
+        let currentAnswers = {}; // Stores answer data for each game
+        let currentComparisons = {}; // Stores values for comparison games
+
+        // --- SPEECH SYNTHESIS ---
+        const synth = window.speechSynthesis;
+        const instructions = {
+            1: "Lihat gambar di kiri dan kanan. Apakah jumlahnya sama? Tekan tombol hijau jika sama, atau merah jika beda.",
+            2: "Hitung gambarnya pelan-pelan. Ada berapa jumlahnya? Pilih angkanya di bawah.",
+            3: "Mana yang jumlahnya lebih banyak? Tekan kotak gambarnya.",
+            4: "Mana yang jumlahnya lebih sedikit? Tekan kotak gambarnya.",
+            5: "Dengarkan baik-baik. Mana yang benar?", // Dynamic for mixed
+        };
+
+        function speak(text) {
+            if (synth.speaking) synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.pitch = 1.1;
+            utterance.rate = 0.9;
+            synth.speak(utterance);
+        }
+
+        function speakCurrentInstruction() {
+            let text = instructions[activeGame.replace('game', '')];
+            // Khusus Game 5 (Dynamic)
+            if (activeGame === 'game5') {
+                const type = currentAnswers.game5_type; // 'more' or 'fewer'
+                text = type === 'more' ? "Mana yang jumlahnya lebih banyak?" : "Mana yang jumlahnya lebih sedikit?";
+            }
+            speak(text);
+        }
+
+        // --- NAVIGATION ---
+        function switchGame(gameId) {
+            activeGame = gameId;
+            // Hide all games
+            document.querySelectorAll('.game-container').forEach(c => c.classList.add('hidden'));
+            document.getElementById(gameId).classList.remove('hidden');
+            
+            // Update Nav Buttons
+            document.querySelectorAll('.nav-button').forEach(b => {
+                b.classList.remove('nav-button-active', 'bg-blue-500', 'text-white');
+                b.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            const activeBtn = document.getElementById('nav-' + gameId);
+            activeBtn.classList.add('nav-button-active', 'bg-blue-500', 'text-white');
+            activeBtn.classList.remove('bg-gray-200', 'text-gray-700');
+            activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+            // Reset Feedback
+            const fb = document.getElementById('global-feedback');
+            fb.textContent = '';
+
+            // Init Game
+            if (gameId === 'game1') setupGame1();
+            if (gameId === 'game2') setupGame2();
+            if (gameId === 'game3') setupGameComparison('game3', 'more');
+            if (gameId === 'game4') setupGameComparison('game4', 'fewer');
+            if (gameId === 'game5') setupGameComparison('game5', 'mixed');
+
+            setTimeout(speakCurrentInstruction, 300);
+        }
+
+        // --- UTILS ---
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function generateItemsHTML(count, assetKey, sizeClass = 'w-12 h-12 md:w-16 md:h-16') {
+            let html = '';
+            for(let i=0; i<count; i++) {
+                html += `<div class="${sizeClass} animate-pulse-slow">${assets[assetKey]}</div>`;
+            }
+            return html;
+        }
+
+        function playFeedback(isCorrect, element) {
+            const fb = document.getElementById('global-feedback');
+            if (isCorrect) {
+                const goodWords = ['Hebat!', 'Pintar!', 'Benar Sekali!', 'Wow!', 'Keren!'];
+                const word = goodWords[Math.floor(Math.random() * goodWords.length)];
+                fb.textContent = word;
+                fb.style.color = '#4ade80'; // green
+                speak(word);
+                if(element) element.classList.add('correct');
+            } else {
+                const tryWords = ['Coba lagi ya.', 'Hampir benar.', 'Ayo hitung lagi.', 'Tetap semangat!'];
+                const word = tryWords[Math.floor(Math.random() * tryWords.length)];
+                fb.textContent = word;
+                fb.style.color = '#f87171'; // red
+                speak(word);
+                if(element) {
+                    element.classList.add('incorrect');
+                    setTimeout(() => element.classList.remove('incorrect'), 1000);
+                }
+            }
+        }
+
+        // --- GAME 1: Sama / Tidak (1-5) ---
+        function setupGame1() {
+            const left = document.getElementById('game1-left');
+            const right = document.getElementById('game1-right');
+            const assetKey = assetKeys[getRandomInt(0, assetKeys.length - 1)];
+
+            const num1 = getRandomInt(1, 5);
+            let num2;
+            
+            // 50% chance equal
+            if (Math.random() > 0.5) {
+                num2 = num1;
+                currentAnswers.game1 = true;
+            } else {
+                do {
+                    num2 = getRandomInt(1, 5);
+                } while (num2 === num1);
+                currentAnswers.game1 = false;
+            }
+
+            left.innerHTML = generateItemsHTML(num1, assetKey);
+            right.innerHTML = generateItemsHTML(num2, assetKey);
+            
+            // Clean previous states
+            document.querySelectorAll('#game1 button').forEach(b => b.classList.remove('correct', 'incorrect'));
+        }
+
+        function checkGame1(userSaysSame, btn) {
+            const isCorrect = userSaysSame === currentAnswers.game1;
+            playFeedback(isCorrect, btn);
+            if(isCorrect) setTimeout(setupGame1, 1500);
+        }
+
+        // --- GAME 2: Count pictures (1-5) ---
+        function setupGame2() {
+            const area = document.getElementById('game2-area');
+            const optionsDiv = document.getElementById('game2-options');
+            const assetKey = assetKeys[getRandomInt(0, assetKeys.length - 1)];
+            const number = getRandomInt(1, 5);
+            currentAnswers.game2 = number;
+
+            area.innerHTML = generateItemsHTML(number, assetKey, 'w-16 h-16 md:w-20 md:h-20');
+
+            // Options: Correct answer + 2 distractors (unique)
+            const options = new Set([number]);
+            while(options.size < 3) {
+                let r = getRandomInt(1, 5);
+                options.add(r);
+            }
+            const optionsArr = shuffleArray(Array.from(options));
+
+            optionsDiv.innerHTML = '';
+            optionsArr.forEach(num => {
+                const btn = document.createElement('button');
+                btn.className = 'game-card number-button flex items-center justify-center rounded-full bg-white border-4 border-blue-200 text-blue-600';
+                btn.textContent = num;
+                btn.onclick = () => checkGame2(num, btn);
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        function checkGame2(num, btn) {
+            const isCorrect = num === currentAnswers.game2;
+            playFeedback(isCorrect, btn);
+            if(isCorrect) setTimeout(setupGame2, 1500);
+        }
+
+        // --- GAME 3, 4, 5: Comparisons (Matching Logic) ---
+        function setupGameComparison(gameId, mode) {
+            // Determine actual mode for mixed game
+            let actualMode = mode;
+            if (mode === 'mixed') {
+                actualMode = Math.random() > 0.5 ? 'more' : 'fewer';
+                const qEl = document.getElementById('game5-question');
+                qEl.innerHTML = actualMode === 'more' 
+                    ? 'Mana yang <span class="text-blue-600 text-2xl">Lebih Banyak</span>?'
+                    : 'Mana yang <span class="text-red-500 text-2xl">Lebih Sedikit</span>?';
+                currentAnswers.game5_type = actualMode;
+            }
+
+            // Generate two distinct numbers (1-5)
+            let n1 = getRandomInt(1, 5);
+            let n2;
+            do { n2 = getRandomInt(1, 5); } while (n1 === n2);
+
+            const assetKey = assetKeys[getRandomInt(0, assetKeys.length - 1)];
+            const btn1 = document.getElementById(`${gameId}-opt1`);
+            const btn2 = document.getElementById(`${gameId}-opt2`);
+
+            // Clear styling
+            btn1.classList.remove('correct', 'incorrect');
+            btn2.classList.remove('correct', 'incorrect');
+
+            // Render items in a column/grid layout for "matching" visual comparison
+            // Using flex-col to stack them like a tower or vertical list to compare height
+            function renderContent(n) {
+                let h = `<div class="matching-container">`;
+                for(let i=0; i<n; i++) {
+                    h += `<div class="w-10 h-10 md:w-14 md:h-14">${assets[assetKey]}</div>`;
+                }
+                h += `</div>`;
+                // Add number label for reinforcement (optional, good for TK)
+                // h += `<div class="text-2xl font-bold mt-2 text-gray-400">${n}</div>`;
+                return h;
+            }
+
+            btn1.innerHTML = renderContent(n1);
+            btn2.innerHTML = renderContent(n2);
+
+            // Store Logic
+            const vals = [n1, n2];
+            currentComparisons[gameId] = vals;
+            
+            // Determine correct index (0 or 1)
+            if (actualMode === 'more') {
+                currentAnswers[gameId] = n1 > n2 ? 0 : 1;
+            } else {
+                currentAnswers[gameId] = n1 < n2 ? 0 : 1;
+            }
+        }
+
+        function checkComparison(gameId, selectedIdx, btn) {
+            const correctIdx = currentAnswers[gameId];
+            const isCorrect = selectedIdx === correctIdx;
+            
+            playFeedback(isCorrect, btn);
+
+            if(isCorrect) {
+                // Determine mode for restart
+                let mode = 'more';
+                if (gameId === 'game4') mode = 'fewer';
+                if (gameId === 'game5') mode = 'mixed';
+                setTimeout(() => setupGameComparison(gameId, mode), 1500);
+            }
+        }
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            switchGame('game1');
+            // Unlock audio context on first interaction
+            document.body.addEventListener('click', () => {
+                if (synth.paused) synth.resume();
+            }, { once: true });
+        });
+    </script>
+</body>
+</html>
