@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Petualangan Matematika Ceria TK</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font Fredoka yang ramah anak -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Fredoka', cursive, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Efek tombol empuk 3D untuk anak-anak */
+    .btn-bubbly {
+      transition: all 0.15s ease-in-out;
+      box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18);
+    }
+    .btn-bubbly:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+    }
+
+    /* Animasi goyang lembut dan floating */
+    @keyframes gentleFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(1deg); }
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      80% { transform: scale(1.08); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-6deg); }
+      75% { transform: rotate(6deg); }
+    }
+
+    .animate-float {
+      animation: gentleFloat 4s ease-in-out infinite;
+    }
+
+    .animate-pop {
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .animate-wiggle {
+      animation: wiggle 0.4s ease-in-out;
+    }
+
+    /* Awan kartun melayang di latar belakang */
+    @keyframes moveCloud {
+      from { transform: translateX(-120%); }
+      to { transform: translateX(120vw); }
+    }
+
+    .cloud-bg {
+      position: absolute;
+      animation: moveCloud 35s linear infinite;
+      opacity: 0.75;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-b from-sky-200 via-yellow-100 to-emerald-100 min-h-screen text-slate-800 flex flex-col items-center justify-between p-3 sm:p-6 relative overflow-x-hidden">
+  
+  <!-- Latar Belakang Elemen Lucu (Awan & Matahari) -->
+  <div class="cloud-bg top-6 -left-20 text-6xl">☁️</div>
+  <div class="cloud-bg top-24 -left-40 text-7xl" style="animation-delay: 15s; animation-duration: 45s;">☁️</div>
+  <div class="absolute top-4 right-6 text-6xl sm:text-7xl animate-pulse pointer-events-none select-none">
+    ☀️
+  </div>
+
+  <header class="w-full max-w-2xl flex flex-wrap items-center justify-between gap-3 z-10 pt-1">
+    <!-- Judul Game -->
+    <div class="flex items-center gap-2">
+      <span class="text-4xl sm:text-5xl animate-bounce">🎈</span>
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-amber-800 tracking-wide drop-shadow-sm">
+          Matematika Ceria
+        </h1>
+        <p class="text-xs sm:text-sm font-semibold text-amber-700">Ayo Belajar Sambil Bermain!</p>
+      </div>
+    </div>
+
+    <!-- Papan Bintang & Kontrol Suara -->
+    <div class="flex items-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-3xl shadow-md border-2 border-amber-300">
+      <div class="flex items-center gap-1.5 font-bold text-amber-600 text-lg sm:text-xl">
+        <span class="text-2xl text-yellow-400">⭐</span>
+        <span id="starCount">0</span>
+      </div>
+
+      <div class="h-6 w-0.5 bg-amber-200"></div>
+
+      <!-- Tombol Suara Efek -->
+      <button id="soundToggleBtn" class="text-2xl p-1 rounded-full hover:scale-110 active:scale-95 transition-transform" title="Suara">
+        🔊
+      </button>
+
+      <!-- Tombol Buku Stiker -->
+      <button id="stickerBookBtn" class="bg-amber-400 hover:bg-amber-500 text-amber-950 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-2xl shadow transition-transform active:scale-95 flex items-center gap-1">
+        <span>🏆</span> Stiker
+      </button>
+    </div>
+  </header>
+
+  <nav class="w-full max-w-xl my-3 sm:my-4 z-10">
+    <div class="grid grid-cols-3 gap-2 bg-amber-200/70 p-1.5 rounded-3xl backdrop-blur-sm shadow-inner">
+      <button data-mode="count" class="mode-btn active-mode bg-white text-emerald-700 shadow-md font-bold py-2 sm:py-2.5 px-2 rounded-2xl text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1 transition-all">
+        <span class="text-xl sm:text-2xl">🍎</span>
+        <span>Hitung</span>
+      </button>
+      <button data-mode="add" class="mode-btn text-amber-900 hover:bg-white/60 font-bold py-2 sm:py-2.5 px-2 rounded-2xl text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1 transition-all">
+        <span class="text-xl sm:text-2xl">➕</span>
+        <span>Tambah</span>
+      </button>
+      <button data-mode="compare" class="mode-btn text-amber-900 hover:bg-white/60 font-bold py-2 sm:py-2.5 px-2 rounded-2xl text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1 transition-all">
+        <span class="text-xl sm:text-2xl">⚖️</span>
+        <span>Banding</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="w-full max-w-xl bg-white/95 backdrop-blur rounded-3xl p-5 sm:p-7 shadow-2xl border-4 border-amber-300 z-10 flex flex-col items-center justify-between min-h-[420px] transition-all relative">
+    
+    <!-- Pertanyaan & Tombol Suara Bicara -->
+    <div class="w-full text-center flex flex-col items-center">
+      <div class="flex items-center justify-center gap-2">
+        <h2 id="questionText" class="text-xl sm:text-2xl font-bold text-amber-900 tracking-wide">
+          Hitung ada berapa buah apel?
+        </h2>
+        <button id="speakQuestionBtn" class="bg-amber-100 hover:bg-amber-200 text-amber-800 p-2 rounded-full text-lg shadow-sm active:scale-90 transition-transform" title="Dengarkan soal">
+          🗣️
+        </button>
+      </div>
+      <p id="instructionSub" class="text-xs sm:text-sm text-amber-600 font-medium mt-1">
+        Sentuh gambar untuk menghitung satu persatu!
+      </p>
+    </div>
+
+    <!-- Area Objek Visual / Benda yang Dihitung -->
+    <div id="visualDisplay" class="my-4 w-full flex flex-wrap items-center justify-center gap-2 sm:gap-3 p-4 bg-amber-50/80 rounded-2xl border-2 border-dashed border-amber-300 min-h-[140px] max-h-[220px] overflow-y-auto">
+      <!-- Objek emoji dimasukkan via JavaScript -->
+    </div>
+
+    <div class="w-full mt-2">
+      <p class="text-center text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+        Pilih Jawabanmu:
+      </p>
+      <div id="optionsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full">
+        <!-- Pilihan jawaban diinjeksi via JavaScript -->
+      </div>
+    </div>
+
+    <!-- Pesan Umpan Balik Lucu (Karakter Maskot) -->
+    <div id="feedbackBox" class="mt-4 w-full text-center py-2 px-4 rounded-2xl font-bold text-sm sm:text-base hidden transition-all">
+      <span id="feedbackEmoji" class="text-2xl mr-1 inline-block">🎉</span>
+      <span id="feedbackMessage">Hebat sekali! Jawabanmu benar!</span>
+    </div>
+  </main>
+
+  <footer class="w-full max-w-xl flex items-center justify-between mt-3 text-xs sm:text-sm text-amber-900/80 font-bold px-2 z-10">
+    <div class="flex items-center gap-2">
+      <span class="text-3xl animate-wiggle inline-block">🐻</span>
+      <span>Halo teman! Kamu hebat terus mencoba!</span>
+    </div>
+    <button id="nextQuestionBtn" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-2xl shadow-lg active:scale-95 transition-all text-sm flex items-center gap-1">
+      <span>Lanjut</span> ➡️
+    </button>
+  </footer>
+
+  <div id="stickerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl border-4 border-amber-400 p-6 max-w-md w-full shadow-2xl animate-pop text-center relative">
+      <button id="closeModalBtn" class="absolute top-3 right-3 text-2xl bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-full w-9 h-9 flex items-center justify-center font-bold">
+        ✕
+      </button>
+
+      <div class="text-4xl mb-2">⭐ Koleksi Stikerku ⭐</div>
+      <p class="text-xs sm:text-sm text-slate-600 font-medium mb-4">
+        Kumpulkan bintang dengan menjawab benar untuk membuka stiker hewan yang lucu!
+      </p>
+
+      <!-- Grid Stiker -->
+      <div id="stickerGrid" class="grid grid-cols-3 gap-3 my-3">
+        <!-- Stiker diisi dengan JS -->
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-amber-200">
+        <p class="text-sm font-bold text-amber-800">
+          Total Bintang: <span id="modalStarCount" class="text-amber-600 text-lg">0</span> ⭐
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canvas Konfeti untuk Perayaan -->
+  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-40 w-full h-full"></canvas>
+
+  <script>
+    // --- STATE MANAGEMENT ---
+    const state = {
+      stars: parseInt(localStorage.getItem('math_stars_tk') || '0', 10),
+      soundEnabled: true,
+      mode: 'count', // 'count', 'add', 'compare'
+      currentAnswer: null,
+      isAnswered: false,
+      questionSpokenText: ''
+    };
+
+    // Daftar Benda/Emoji Menggemaskan
+    const ITEM_EMOJIS = [
+      { emoji: '🍎', name: 'apel' },
+      { emoji: '🍓', name: 'stroberi' },
+      { emoji: '🍌', name: 'pisang' },
+      { emoji: '🐱', name: 'kucing' },
+      { emoji: '🐰', name: 'kelinci' },
+      { emoji: '🌟', name: 'bintang' },
+      { emoji: '🚗', name: 'mobil' },
+      { emoji: '🦆', name: 'bebek' },
+      { emoji: '🎈', name: 'balon' },
+      { emoji: '🐟', name: 'ikan' }
+    ];
+
+    // Daftar Stiker yang Dapat Dikoleksi Berdasarkan Bintang
+    const STICKER_LIST = [
+      { id: 1, emoji: '🐥', name: 'Anak Ayam', starsNeeded: 1 },
+      { id: 2, emoji: '🐼', name: 'Panda Imut', starsNeeded: 3 },
+      { id: 3, emoji: '🦁', name: 'Singa Berani', starsNeeded: 6 },
+      { id: 4, emoji: '🦄', name: 'Unicorn Ajaib', starsNeeded: 9 },
+      { id: 5, emoji: '🚀', name: 'Roket Luar Angkasa', starsNeeded: 12 },
+      { id: 6, emoji: '👑', name: 'Mahkota Juara', starsNeeded: 15 }
+    ];
+
+    // --- AUDIO SYNTHESIS DENGAN WEB AUDIO API (Bebas URL eksternal) ---
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Suara saat sentuh objek
+    function playTapSound() {
+      if (!state.soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(750, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.1);
+      } catch (e) {}
+    }
+
+    // Suara Benar Ceria (Ding Ding Melodi Riang)
+    function playCorrectSound() {
+      if (!state.soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, index) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.value = freq;
+          const startTime = ctx.currentTime + index * 0.09;
+          gain.gain.setValueAtTime(0.25, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.26);
+        });
+      } catch (e) {}
+    }
+
+    // Suara Coba Lagi (Boing Lembut, tidak mengagetkan)
+    function playRetrySound() {
+      if (!state.soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    // Fitur Suara Membacakan Soal (Bahasa Indonesia)
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'id-ID';
+      utterance.rate = 0.9; // Kecepatan sedikit ramah anak
+      utterance.pitch = 1.2; // Nada ceria
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // --- CONFETTI ANIMATION MINI ENGINE ---
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const ctxConfetti = confettiCanvas.getContext('2d');
+    let confettiParticles = [];
+    let confettiAnimationId = null;
+
+    function resizeCanvas() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function triggerConfetti() {
+      confettiParticles = [];
+      const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+      for (let i = 0; i < 70; i++) {
+        confettiParticles.push({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.7) * 16,
+          size: Math.random() * 9 + 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 10,
+          opacity: 1
+        });
+      }
+      if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+      animateConfetti();
+    }
+
+    function animateConfetti() {
+      ctxConfetti.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      let activeParticles = 0;
+
+      confettiParticles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.35; // gravitasi
+        p.rotation += p.rotationSpeed;
+        p.opacity -= 0.012;
+
+        if (p.opacity > 0) {
+          activeParticles++;
+          ctxConfetti.save();
+          ctxConfetti.translate(p.x, p.y);
+          ctxConfetti.rotate((p.rotation * Math.PI) / 180);
+          ctxConfetti.fillStyle = p.color;
+          ctxConfetti.globalAlpha = Math.max(p.opacity, 0);
+          ctxConfetti.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctxConfetti.restore();
+        }
+      });
+
+      if (activeParticles > 0) {
+        confettiAnimationId = requestAnimationFrame(animateConfetti);
+      } else {
+        ctxConfetti.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      }
+    }
+
+    // 1. Mode: Hitung Benda (1 - 10)
+    function generateCountQuestion() {
+      const item = ITEM_EMOJIS[Math.floor(Math.random() * ITEM_EMOJIS.length)];
+      const count = Math.floor(Math.random() * 8) + 1; // 1 s.d 8 untuk anak TK
+
+      state.currentAnswer = count;
+      state.questionSpokenText = `Hitung ada berapa ${item.name}?`;
+
+      document.getElementById('questionText').innerText = `Ada berapa ${item.name}?`;
+      document.getElementById('instructionSub').innerText = 'Sentuh setiap benda untuk berhitung yuk!';
+
+      const visual = document.getElementById('visualDisplay');
+      visual.innerHTML = '';
+
+      for (let i = 1; i <= count; i++) {
+        const itemEl = document.createElement('button');
+        itemEl.className = 'relative text-4xl sm:text-5xl p-2 rounded-2xl bg-white shadow-sm border border-amber-200 hover:scale-110 active:scale-95 transition-transform flex items-center justify-center';
+        itemEl.innerHTML = `<span>${item.emoji}</span><span class="count-badge hidden absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow">${i}</span>`;
+        
+        // Interaktivitas anak: sentuh gambar untuk menandai hitungan
+        itemEl.onclick = () => {
+          playTapSound();
+          const badge = itemEl.querySelector('.count-badge');
+          if (badge.classList.contains('hidden')) {
+            badge.classList.remove('hidden');
+            itemEl.classList.add('bg-amber-100', 'border-amber-400');
+          }
+        };
+        visual.appendChild(itemEl);
+      }
+
+      renderOptions(count, 1, 10);
+    }
+
+    // 2. Mode: Penjumlahan Sederhana (Jumlah maksimal 10)
+    function generateAddQuestion() {
+      const item = ITEM_EMOJIS[Math.floor(Math.random() * ITEM_EMOJIS.length)];
+      const num1 = Math.floor(Math.random() * 4) + 1; // 1 s.d 4
+      const num2 = Math.floor(Math.random() * 4) + 1; // 1 s.d 4
+      const total = num1 + num2;
+
+      state.currentAnswer = total;
+      state.questionSpokenText = `Berapa hasil ${num1} ditambah ${num2}?`;
+
+      document.getElementById('questionText').innerText = `${num1} + ${num2} = ?`;
+      document.getElementById('instructionSub').innerText = 'Hitung semua buah yang ada di kedua kotak!';
+
+      const visual = document.getElementById('visualDisplay');
+      visual.innerHTML = `
+        <div class="flex flex-wrap items-center justify-center gap-2 bg-white/90 p-2.5 rounded-2xl border-2 border-amber-200">
+          ${Array(num1).fill(0).map((_, i) => `<span class="text-3xl sm:text-4xl animate-pop">${item.emoji}</span>`).join('')}
+        </div>
+        <div class="text-3xl font-extrabold text-amber-700 mx-1">➕</div>
+        <div class="flex flex-wrap items-center justify-center gap-2 bg-white/90 p-2.5 rounded-2xl border-2 border-amber-200">
+          ${Array(num2).fill(0).map((_, i) => `<span class="text-3xl sm:text-4xl animate-pop">${item.emoji}</span>`).join('')}
+        </div>
+      `;
+
+      renderOptions(total, 2, 10);
+    }
+
+    // 3. Mode: Mana Lebih Banyak? (Visual Comparison)
+    function generateCompareQuestion() {
+      const item1 = ITEM_EMOJIS[Math.floor(Math.random() * ITEM_EMOJIS.length)];
+      let item2 = ITEM_EMOJIS[Math.floor(Math.random() * ITEM_EMOJIS.length)];
+      while (item2.name === item1.name) {
+        item2 = ITEM_EMOJIS[Math.floor(Math.random() * ITEM_EMOJIS.length)];
+      }
+
+      let countA = Math.floor(Math.random() * 6) + 1;
+      let countB = Math.floor(Math.random() * 6) + 1;
+      while (countA === countB) {
+        countB = Math.floor(Math.random() * 6) + 1;
+      }
+
+      // Jawaban yang benar adalah nama atau pilihan yang jumlahnya lebih banyak
+      const maxCount = Math.max(countA, countB);
+      state.currentAnswer = maxCount === countA ? 'KIRI' : 'KANAN';
+      state.questionSpokenText = 'Kotak mana yang memiliki benda lebih banyak?';
+
+      document.getElementById('questionText').innerText = 'Mana yang Lebih Banyak?';
+      document.getElementById('instructionSub').innerText = 'Pilih kelompok benda yang jumlahnya paling banyak!';
+
+      const visual = document.getElementById('visualDisplay');
+      visual.innerHTML = `
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+          <div class="flex-1 bg-white p-3 rounded-2xl border-2 border-indigo-200 flex flex-col items-center w-full">
+            <span class="text-xs font-bold text-indigo-700 mb-1">Pilihan A</span>
+            <div class="flex flex-wrap justify-center gap-1.5 min-h-[50px] items-center">
+              ${Array(countA).fill(0).map(() => `<span class="text-3xl">${item1.emoji}</span>`).join('')}
+            </div>
+            <span class="text-xs font-semibold text-slate-400 mt-1">(${countA} ${item1.name})</span>
+          </div>
+
+          <div class="text-xl font-bold text-amber-600">ATAU</div>
+
+          <div class="flex-1 bg-white p-3 rounded-2xl border-2 border-emerald-200 flex flex-col items-center w-full">
+            <span class="text-xs font-bold text-emerald-700 mb-1">Pilihan B</span>
+            <div class="flex flex-wrap justify-center gap-1.5 min-h-[50px] items-center">
+              ${Array(countB).fill(0).map(() => `<span class="text-3xl">${item2.emoji}</span>`).join('')}
+            </div>
+            <span class="text-xs font-semibold text-slate-400 mt-1">(${countB} ${item2.name})</span>
+          </div>
+        </div>
+      `;
+
+      // Khusus mode banding: 2 tombol pilihan
+      const optionsContainer = document.getElementById('optionsContainer');
+      optionsContainer.className = 'grid grid-cols-2 gap-4 w-full';
+      optionsContainer.innerHTML = `
+        <button onclick="handleAnswer('KIRI')" class="btn-bubbly bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold text-lg sm:text-xl py-4 rounded-3xl active:scale-95 transition-all">
+          👈 Pilihan A
+        </button>
+        <button onclick="handleAnswer('KANAN')" class="btn-bubbly bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-lg sm:text-xl py-4 rounded-3xl active:scale-95 transition-all">
+          Pilihan B 👉
+        </button>
+      `;
+    }
+
+    function renderOptions(correctNum, minVal, maxVal) {
+      const optionsContainer = document.getElementById('optionsContainer');
+      optionsContainer.className = 'grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full';
+      optionsContainer.innerHTML = '';
+
+      // Menghasilkan 4 opsi unik
+      const choices = new Set([correctNum]);
+      while (choices.size < 4) {
+        let rand = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
+        choices.add(rand);
+      }
+
+      // Acak urutan tombol
+      const shuffled = Array.from(choices).sort(() => Math.random() - 0.5);
+
+      const colorClasses = [
+        'bg-rose-400 hover:bg-rose-500 text-white',
+        'bg-amber-400 hover:bg-amber-500 text-amber-950',
+        'bg-emerald-400 hover:bg-emerald-500 text-emerald-950',
+        'bg-sky-400 hover:bg-sky-500 text-sky-950'
+      ];
+
+      shuffled.forEach((val, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `btn-bubbly ${colorClasses[idx % colorClasses.length]} font-extrabold text-3xl sm:text-4xl py-3.5 sm:py-4 rounded-3xl transition-transform flex flex-col items-center justify-center`;
+        btn.innerHTML = `
+          <span>${val}</span>
+          <span class="flex gap-0.5 mt-0.5 opacity-60">
+            ${Array(Math.min(val, 5)).fill('•').join('')}
+          </span>
+        `;
+        btn.onclick = () => handleAnswer(val);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(userChoice) {
+      if (state.isAnswered) return;
+
+      const feedbackBox = document.getElementById('feedbackBox');
+      const feedbackEmoji = document.getElementById('feedbackEmoji');
+      const feedbackMessage = document.getElementById('feedbackMessage');
+      const nextBtn = document.getElementById('nextQuestionBtn');
+
+      if (userChoice === state.currentAnswer) {
+        // JAWABAN BENAR
+        state.isAnswered = true;
+        state.stars += 1;
+        saveStars();
+        updateStarDisplay();
+
+        playCorrectSound();
+        triggerConfetti();
+
+        feedbackBox.className = 'mt-4 w-full text-center py-2.5 px-4 rounded-2xl font-bold text-sm sm:text-base bg-emerald-100 text-emerald-800 border-2 border-emerald-300 block animate-pop';
+        const praises = [
+          'Hore! Kamu Pintar Sekali! 🌟',
+          'Luar Biasa! Jawabanmu Tepat! 🎈',
+          'Hebat! Tambah 1 Bintang! 🏆',
+          'Wah, Kamu Jago Berhitung! 🍓'
+        ];
+        const randomPraise = praises[Math.floor(Math.random() * praises.length)];
+        feedbackEmoji.innerText = '🎉';
+        feedbackMessage.innerText = randomPraise;
+
+        speakText('Bagus sekali! Jawabanmu benar!');
+        nextBtn.classList.remove('hidden');
+
+        // Otomatis lanjut setelah 2.5 detik jika tidak diklik
+        setTimeout(() => {
+          if (state.isAnswered) {
+            nextQuestion();
+          }
+        }, 2600);
+
+      } else {
+        // JAWABAN KURANG TEPAT (Tetap memotivasi dengan lembut)
+        playRetrySound();
+        feedbackBox.className = 'mt-4 w-full text-center py-2 px-4 rounded-2xl font-bold text-sm sm:text-base bg-amber-100 text-amber-800 border-2 border-amber-300 block animate-pop';
+        feedbackEmoji.innerText = '💪';
+        feedbackMessage.innerText = 'Hampir benar! Ayo coba hitung sekali lagi ya!';
+        speakText('Coba lagi ya, kamu pasti bisa!');
+      }
+    }
+
+    function nextQuestion() {
+      state.isAnswered = false;
+      document.getElementById('feedbackBox').classList.add('hidden');
+      document.getElementById('nextQuestionBtn').classList.add('hidden');
+
+      if (state.mode === 'count') {
+        generateCountQuestion();
+      } else if (state.mode === 'add') {
+        generateAddQuestion();
+      } else if (state.mode === 'compare') {
+        generateCompareQuestion();
+      }
+    }
+
+    function setMode(newMode) {
+      state.mode = newMode;
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        if (btn.dataset.mode === newMode) {
+          btn.classList.add('bg-white', 'text-emerald-700', 'shadow-md');
+          btn.classList.remove('text-amber-900', 'hover:bg-white/60');
+        } else {
+          btn.classList.remove('bg-white', 'text-emerald-700', 'shadow-md');
+          btn.classList.add('text-amber-900', 'hover:bg-white/60');
+        }
+      });
+      nextQuestion();
+    }
+
+    function saveStars() {
+      localStorage.setItem('math_stars_tk', state.stars.toString());
+    }
+
+    function updateStarDisplay() {
+      document.getElementById('starCount').innerText = state.stars;
+      document.getElementById('modalStarCount').innerText = state.stars;
+    }
+
+    function renderStickers() {
+      const grid = document.getElementById('stickerGrid');
+      grid.innerHTML = '';
+
+      STICKER_LIST.forEach(sticker => {
+        const isUnlocked = state.stars >= sticker.starsNeeded;
+        const item = document.createElement('div');
+        item.className = `p-3 rounded-2xl border-2 flex flex-col items-center justify-center transition-all ${
+          isUnlocked
+            ? 'bg-amber-50 border-amber-300 shadow-sm'
+            : 'bg-slate-100 border-slate-200 opacity-50 grayscale'
+        }`;
+
+        item.innerHTML = `
+          <span class="text-4xl mb-1">${isUnlocked ? sticker.emoji : '🔒'}</span>
+          <span class="text-xs font-bold text-slate-700">${sticker.name}</span>
+          <span class="text-[10px] text-amber-700 font-semibold mt-0.5">
+            ${isUnlocked ? 'Terbuka! ✨' : `Butuh ${sticker.starsNeeded} ⭐`}
+          </span>
+        `;
+        grid.appendChild(item);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateStarDisplay();
+
+      // Mode Navigation
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          playTapSound();
+          setMode(btn.dataset.mode);
+        });
+      });
+
+      // Tombol Suara Toggle
+      const soundBtn = document.getElementById('soundToggleBtn');
+      soundBtn.addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        soundBtn.innerText = state.soundEnabled ? '🔊' : '🔇';
+      });
+
+      // Tombol Bicara Soal
+      document.getElementById('speakQuestionBtn').addEventListener('click', () => {
+        playTapSound();
+        if (state.questionSpokenText) {
+          speakText(state.questionSpokenText);
+        }
+      });
+
+      // Tombol Soal Lanjut
+      document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+        playTapSound();
+        nextQuestion();
+      });
+
+      // Modal Stiker
+      const stickerModal = document.getElementById('stickerModal');
+      document.getElementById('stickerBookBtn').addEventListener('click', () => {
+        playTapSound();
+        renderStickers();
+        stickerModal.classList.remove('hidden');
+      });
+
+      document.getElementById('closeModalBtn').addEventListener('click', () => {
+        playTapSound();
+        stickerModal.classList.add('hidden');
+      });
+
+      // Tutup modal jika klik di luar box
+      stickerModal.addEventListener('click', (e) => {
+        if (e.target === stickerModal) {
+          stickerModal.classList.add('hidden');
+        }
+      });
+
+      // Mulai soal pertama
+      nextQuestion();
+    });
+  </script>
+</body>
+</html>
